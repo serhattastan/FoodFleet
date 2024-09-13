@@ -1,6 +1,11 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.jetbrains.kotlin.android)
+    // Kotlin Annotation Processing Tool (KAPT) - Dagger Hilt gibi anotasyon tabanlı işlemler için gerekli
+    id("kotlin-kapt")
+
+    // Dagger Hilt kullanarak bağımlılık enjeksiyonu yapmamızı sağlayan eklenti
+    id("dagger.hilt.android.plugin")
 }
 
 android {
@@ -66,4 +71,21 @@ dependencies {
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
+
+    implementation("androidx.navigation:navigation-compose:2.7.6")
+    implementation ("com.google.code.gson:gson:2.10")
+
+    implementation("androidx.lifecycle:lifecycle-viewmodel:2.5.1")
+    implementation("androidx.activity:activity-ktx:1.6.1")
+    implementation("androidx.compose.runtime:runtime-livedata:1.5.4")
+
+    implementation("com.google.dagger:hilt-android:2.48")
+    kapt("com.google.dagger:hilt-android-compiler:2.48")
+
+    implementation("com.squareup.retrofit2:retrofit:2.6.0")
+    implementation("com.google.code.gson:gson:2.9.0")
+    implementation("com.squareup.retrofit2:converter-gson:2.5.0")
+
+    // Lottie animasyon kütüphanesi
+    implementation ("com.airbnb.android:lottie-compose:6.0.0")
 }
