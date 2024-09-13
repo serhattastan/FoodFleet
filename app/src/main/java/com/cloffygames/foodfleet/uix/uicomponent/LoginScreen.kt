@@ -1,5 +1,7 @@
 package com.cloffygames.foodfleet.uix.uicomponent
 
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -41,6 +43,7 @@ import com.airbnb.lottie.compose.animateLottieCompositionAsState
 import com.airbnb.lottie.compose.rememberLottieComposition
 import com.cloffygames.foodfleet.R
 import com.cloffygames.foodfleet.uix.viewmodel.AuthViewModel
+import com.google.android.gms.auth.api.signin.GoogleSignIn
 
 /**
  * LoginScreen composable fonksiyonu, kullanıcı giriş ekranını oluşturur.
@@ -56,14 +59,39 @@ fun LoginScreen(onRegisterClick: () -> Unit, authViewModel: AuthViewModel, navCo
     var errorMessage by remember { mutableStateOf("") }
     var passwordVisible by remember { mutableStateOf(false) }  // Şifre görünürlüğünü kontrol eden state
 
-    // Lottie animasyonunu yüklemek ve ilerlemesini kontrol etmek için kompozisyonu oluşturur
+    // Lottie animasyonu
     val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(R.raw.auth_anim))
     val progress by animateLottieCompositionAsState(composition, iterations = LottieConstants.IterateForever)
+
+    val launcher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        val task = GoogleSignIn.getSignedInAccountFromIntent(result.data)
+        task.addOnCompleteListener { accountTask ->
+            if (accountTask.isSuccessful) {
+                val account = accountTask.result
+                account?.idToken?.let { token ->
+                    authViewModel.signInWithGoogle(token) { success, error ->
+                        if (success) {
+                            // Google girişi başarılı, HomeScreen'e yönlendirme
+                            navController.navigate("HomeScreen") {
+                                popUpTo("LoginScreen") { inclusive = true }
+                            }
+                        } else {
+                            errorMessage = error ?: "Google Sign-In failed"
+                        }
+                    }
+                }
+            } else {
+                errorMessage = "Google Sign-In failed"
+            }
+        }
+    }
 
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(16.dp),  // Genel boşluklar
+            .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
@@ -72,42 +100,42 @@ fun LoginScreen(onRegisterClick: () -> Unit, authViewModel: AuthViewModel, navCo
             composition = composition,
             progress = progress,
             modifier = Modifier
-                .size(375.dp, 250.dp)  // Animasyon boyutları
+                .size(375.dp, 250.dp)
         )
 
-        Spacer(modifier = Modifier.height(24.dp))  // Animasyon ile başlık arasındaki boşluk
+        Spacer(modifier = Modifier.height(24.dp))
 
         // Hoşgeldiniz başlığı
         Text(
             text = "Welcome!",
             style = MaterialTheme.typography.headlineSmall.copy(
                 fontWeight = FontWeight.Bold,
-                fontSize = 24.sp  // Başlık yazı boyutu
+                fontSize = 24.sp
             ),
             color = MaterialTheme.colorScheme.primary
         )
 
-        Spacer(modifier = Modifier.height(16.dp))  // Başlık ile giriş alanları arasındaki boşluk
+        Spacer(modifier = Modifier.height(16.dp))
 
         // E-posta giriş alanı
         OutlinedTextField(
             value = email,
             onValueChange = { email = it },
             label = { Text("Email") },
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),  // Klavye tipi: E-posta
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
             modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(12.dp)  // Yuvarlatılmış kenarlar
+            shape = RoundedCornerShape(12.dp)
         )
 
-        Spacer(modifier = Modifier.height(12.dp))  // E-posta ve şifre alanı arasındaki boşluk
+        Spacer(modifier = Modifier.height(12.dp))
 
         // Parola giriş alanı
         OutlinedTextField(
             value = password,
             onValueChange = { password = it },
             label = { Text("Password") },
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),  // Klavye tipi: Parola
-            visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),  // Şifreyi gizle/göster
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+            visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
             modifier = Modifier.fillMaxWidth(),
             trailingIcon = {
                 val image = if (passwordVisible)
@@ -116,27 +144,21 @@ fun LoginScreen(onRegisterClick: () -> Unit, authViewModel: AuthViewModel, navCo
                     painterResource(id = R.drawable.icon_visibility_off)
 
                 IconButton(onClick = { passwordVisible = !passwordVisible }) {
-                    Icon(
-                        painter = image,
-                        contentDescription = null,
-                        modifier = Modifier.size(20.dp)  // İkon boyutunu ayarla
-                    )
+                    Icon(painter = image, contentDescription = null, modifier = Modifier.size(20.dp))
                 }
             },
-            shape = RoundedCornerShape(12.dp)  // Yuvarlatılmış kenarlar
+            shape = RoundedCornerShape(12.dp)
         )
 
-        Spacer(modifier = Modifier.height(24.dp))  // Şifre alanı ile butonlar arasındaki boşluk
+        Spacer(modifier = Modifier.height(24.dp))
 
         // Giriş yap butonu
         Button(
             onClick = {
                 authViewModel.login(email, password) { success, error ->
                     if (success) {
-                        // Başarılı girişte HomeScreen'e yönlendirme, geri dönülemez şekilde
                         navController.navigate("HomeScreen") {
-                            popUpTo("AuthScreen") { inclusive = true }  // LoginScreen'i yığından çıkar
-                            launchSingleTop = true  // Aynı ekranı üst üste açmayı engelle
+                            popUpTo("AuthScreen") { inclusive = true }
                         }
                     } else {
                         errorMessage = error ?: "Unknown error"
@@ -145,49 +167,47 @@ fun LoginScreen(onRegisterClick: () -> Unit, authViewModel: AuthViewModel, navCo
             },
             modifier = Modifier
                 .fillMaxWidth()
-                .height(45.dp),  // Buton boyutları
-            shape = RoundedCornerShape(12.dp),  // Yuvarlatılmış kenarlar
-            colors = ButtonDefaults.buttonColors(
-                containerColor = MaterialTheme.colorScheme.primary  // Buton arka plan rengi
-            )
+                .height(45.dp),
+            shape = RoundedCornerShape(12.dp),
+            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
         ) {
-            Text(text = "Sign In", fontSize = 16.sp, fontWeight = FontWeight.Bold)  // Buton yazı stili
+            Text(text = "Sign In", fontSize = 16.sp, fontWeight = FontWeight.Bold)
         }
 
-        // Error mesajı gösterme
         if (errorMessage.isNotEmpty()) {
-            Spacer(modifier = Modifier.height(12.dp))  // Boşluk
+            Spacer(modifier = Modifier.height(12.dp))
             Text(text = errorMessage, color = Color.Red)
         }
 
-        Spacer(modifier = Modifier.height(12.dp))  // Giriş butonu ile Google butonu arasındaki boşluk
+        Spacer(modifier = Modifier.height(12.dp))
 
         // Google ile giriş yap butonu
         Button(
-            onClick = { /* TODO: Google ile giriş işlemi işlenir */ },
+            onClick = {
+                val signInIntent = authViewModel.getGoogleSignInClient().signInIntent
+                launcher.launch(signInIntent)
+            },
             modifier = Modifier
                 .fillMaxWidth()
-                .height(45.dp),  // Buton boyutları
-            shape = RoundedCornerShape(12.dp),  // Yuvarlatılmış kenarlar
-            colors = ButtonDefaults.buttonColors(
-                containerColor = Color(0xFF4285F4),  // Google mavi rengi
-                contentColor = Color.White  // Yazı rengi: Beyaz
-            )
+                .height(45.dp),
+            shape = RoundedCornerShape(12.dp),
+            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF4285F4), contentColor = Color.White)
         ) {
-            Text(text = "Sign in with Google", fontSize = 16.sp, fontWeight = FontWeight.Bold)  // Buton yazı stili
+            Text(text = "Sign in with Google", fontSize = 16.sp, fontWeight = FontWeight.Bold)
         }
 
-        Spacer(modifier = Modifier.height(24.dp))  // Google butonu ile kayıt linki arasındaki boşluk
+        Spacer(modifier = Modifier.height(24.dp))
 
         // Kayıt sayfasına yönlendirme linki
         Text(
             text = "Don't have an account? Sign up",
-            modifier = Modifier.clickable { onRegisterClick() },  // Tıklanabilir metin
-            color = MaterialTheme.colorScheme.primary,  // Metin rengi
-            fontSize = 14.sp,  // Metin boyutu
+            modifier = Modifier.clickable { onRegisterClick() },
+            color = MaterialTheme.colorScheme.primary,
+            fontSize = 14.sp,
             fontWeight = FontWeight.Medium
         )
     }
 }
+
 
 

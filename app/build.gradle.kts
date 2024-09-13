@@ -91,9 +91,12 @@ dependencies {
     // Lottie animasyon kütüphanesi
     implementation ("com.airbnb.android:lottie-compose:6.0.0")
 
-    implementation(platform("com.google.firebase:firebase-bom:33.2.0"))
+    implementation(platform("com.google.firebase:firebase-bom:33.3.0"))
     implementation("com.google.firebase:firebase-analytics")
     implementation("com.google.firebase:firebase-auth:23.0.0")
     implementation("com.google.firebase:firebase-firestore:25.1.0")
 
+    // Google Sign-In için play-services-auth bağımlılığı
+    implementation("com.google.android.gms:play-services-auth:21.2.0")  // Sürümü ekledik
 }
+
