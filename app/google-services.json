@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "856886753550",
+    "project_id": "food-fleet-e8972",
+    "storage_bucket": "food-fleet-e8972.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:856886753550:android:fcc59c508da03622837f5f",
+        "android_client_info": {
+          "package_name": "com.cloffygames.foodfleet"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "856886753550-25iuhnnpuuc3799p5bhij80tsfbt0hog.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.cloffygames.foodfleet",
+            "certificate_hash": "779fdfbfb9bc2b031f9f3927dad824a23d359fd3"
+          }
+        },
+        {
+          "client_id": "856886753550-j2oe4qa5chec6gt16m7oemf060f5eb9p.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDEs6a-1NbbYPeZoCom39dEPC0umKBLSGU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "856886753550-j2oe4qa5chec6gt16m7oemf060f5eb9p.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

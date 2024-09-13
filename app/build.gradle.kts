@@ -6,6 +6,8 @@ plugins {
 
     // Dagger Hilt kullanarak bağımlılık enjeksiyonu yapmamızı sağlayan eklenti
     id("dagger.hilt.android.plugin")
+
+    id("com.google.gms.google-services")
 }
 
 android {
@@ -88,4 +90,10 @@ dependencies {
 
     // Lottie animasyon kütüphanesi
     implementation ("com.airbnb.android:lottie-compose:6.0.0")
+
+    implementation(platform("com.google.firebase:firebase-bom:33.2.0"))
+    implementation("com.google.firebase:firebase-analytics")
+    implementation("com.google.firebase:firebase-auth:23.0.0")
+    implementation("com.google.firebase:firebase-firestore:25.1.0")
+
 }
