@@ -1,55 +1,60 @@
 package com.cloffygames.foodfleet.data.repo
 
-import com.google.android.gms.auth.api.signin.GoogleSignInClient
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.FirebaseUser
-import com.google.firebase.auth.GoogleAuthProvider
+import com.cloffygames.foodfleet.data.datasource.AuthenticationDataSource
 import javax.inject.Inject
 
+/**
+ * AuthenticationRepository, AuthenticationDataSource'tan gelen kimlik doğrulama işlemlerini yönetir.
+ * Bu repository, veri kaynağından (data source) gelen işlemleri daha üst katmanlara sunar.
+ *
+ * @param ads AuthenticationDataSource nesnesi.
+ */
 class AuthenticationRepository @Inject constructor(
-    private val firebaseAuth: FirebaseAuth,
-    private val googleSignInClient: GoogleSignInClient
+    var ads: AuthenticationDataSource
 ) {
+    /**
+     * Geçerli oturum açmış kullanıcıyı döner.
+     *
+     * @return Geçerli kullanıcı, yoksa null.
+     */
+    fun getCurrentUser() = ads.getCurrentUser()
 
-    fun getCurrentUser(): FirebaseUser? {
-        return firebaseAuth.currentUser
-    }
+    /**
+     * Kullanıcı email ve şifre ile oturum açar.
+     *
+     * @param email Kullanıcı e-posta adresi.
+     * @param password Kullanıcı şifresi.
+     * @param onResult Oturum açma sonucunu dönen callback fonksiyonu.
+     * onResult: (başarılı mı?, hata mesajı?)
+     */
+    fun login(email: String, password: String, onResult: (Boolean, String?) -> Unit) =
+        ads.login(email, password, onResult)
 
-    fun login(email: String, password: String, onResult: (Boolean, String?) -> Unit) {
-        firebaseAuth.signInWithEmailAndPassword(email, password)
-            .addOnCompleteListener { task ->
-                if (task.isSuccessful) {
-                    onResult(true, null)
-                } else {
-                    onResult(false, task.exception?.message)
-                }
-            }
-    }
+    /**
+     * Kullanıcı email ve şifre ile yeni bir hesap oluşturur.
+     *
+     * @param email Kullanıcı e-posta adresi.
+     * @param password Kullanıcı şifresi.
+     * @param onResult Kayıt olma sonucunu dönen callback fonksiyonu.
+     * onResult: (başarılı mı?, hata mesajı?)
+     */
+    fun register(email: String, password: String, onResult: (Boolean, String?) -> Unit) =
+        ads.register(email, password, onResult)
 
-    fun register(email: String, password: String, onResult: (Boolean, String?) -> Unit) {
-        firebaseAuth.createUserWithEmailAndPassword(email, password)
-            .addOnCompleteListener { task ->
-                if (task.isSuccessful) {
-                    onResult(true, null)
-                } else {
-                    onResult(false, task.exception?.message)
-                }
-            }
-    }
+    /**
+     * Google Sign-In ile oturum açma işlemi yapar.
+     *
+     * @param token Google oturum açma işlemi için kullanılan token.
+     * @param onResult Google ile oturum açma sonucunu dönen callback fonksiyonu.
+     * onResult: (başarılı mı?, hata mesajı?)
+     */
+    fun signInWithGoogle(token: String, onResult: (Boolean, String?) -> Unit) =
+        ads.signInWithGoogle(token, onResult)
 
-    fun signInWithGoogle(token: String, onResult: (Boolean, String?) -> Unit) {
-        val credential = GoogleAuthProvider.getCredential(token, null)
-        firebaseAuth.signInWithCredential(credential)
-            .addOnCompleteListener { task ->
-                if (task.isSuccessful) {
-                    onResult(true, null)
-                } else {
-                    onResult(false, task.exception?.message)
-                }
-            }
-    }
-
-    fun getGoogleSignInClient(): GoogleSignInClient {
-        return googleSignInClient
-    }
+    /**
+     * Google Sign-In Client'ını döner.
+     *
+     * @return GoogleSignInClient nesnesi.
+     */
+    fun getGoogleSignInClient() = ads.getGoogleSignInClient()
 }
