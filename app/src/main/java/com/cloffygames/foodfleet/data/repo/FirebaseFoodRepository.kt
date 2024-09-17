@@ -1,6 +1,8 @@
 package com.cloffygames.foodfleet.data.repo
 
+import androidx.lifecycle.MutableLiveData
 import com.cloffygames.foodfleet.data.datasource.FirebaseFoodDataSource
+import com.cloffygames.foodfleet.data.entity.FirebaseFood
 import javax.inject.Inject
 
 /**
@@ -18,20 +20,12 @@ class FirebaseFoodRepository @Inject constructor(
      *
      * @return MutableLiveData içinde yemek listesi döner.
      */
-    fun getFoodsFromFireStore() = fds.getFoodsFromFireStore()
-
-    /**
-     * Verilen kategoriye göre yemekleri çeker.
-     *
-     * @param category Aranan yemek kategorisi.
-     * @return MutableLiveData içinde belirtilen kategoriye ait yemek listesi döner.
-     */
-    fun getFoodsByCategory(category: String) = fds.getFoodsByCategory(category)
+    fun getFoodsFromFireStore(): MutableLiveData<List<FirebaseFood>> = fds.getFoodsFromFireStore()
 
     /**
      * Firebase'deki yemeklerin kategorilerini çeker.
      *
      * @return MutableLiveData içinde benzersiz kategoriler listesi döner.
      */
-    fun getCategoriesFromFoods() = fds.getCategoriesFromFoods()
+    fun getCategoriesFromFoods(): MutableLiveData<List<String>> = fds.getCategoriesFromFoods()
 }

@@ -5,7 +5,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.cloffygames.foodfleet.uix.viewmodel.AuthViewModel
-import com.cloffygames.foodfleet.viewmodel.HomeViewModel
+import com.cloffygames.foodfleet.uix.viewmodel.HomeViewModel
 
 @Composable
 fun Transitions(authViewModel: AuthViewModel, homeViewModel: HomeViewModel){

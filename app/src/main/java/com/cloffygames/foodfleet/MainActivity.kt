@@ -8,7 +8,7 @@ import androidx.activity.viewModels
 import com.cloffygames.foodfleet.ui.theme.FoodFleetTheme
 import com.cloffygames.foodfleet.uix.view.Transitions
 import com.cloffygames.foodfleet.uix.viewmodel.AuthViewModel
-import com.cloffygames.foodfleet.viewmodel.HomeViewModel
+import com.cloffygames.foodfleet.uix.viewmodel.HomeViewModel
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint

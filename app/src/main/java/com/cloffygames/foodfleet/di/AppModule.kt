@@ -4,8 +4,12 @@ import android.app.Application
 import android.content.Context
 import com.cloffygames.foodfleet.data.datasource.AuthenticationDataSource
 import com.cloffygames.foodfleet.data.datasource.FirebaseFoodDataSource
+import com.cloffygames.foodfleet.data.datasource.FoodDataSource
 import com.cloffygames.foodfleet.data.repo.AuthenticationRepository
 import com.cloffygames.foodfleet.data.repo.FirebaseFoodRepository
+import com.cloffygames.foodfleet.data.repo.FoodRepository
+import com.cloffygames.foodfleet.retrofit.ApiUtils
+import com.cloffygames.foodfleet.retrofit.FoodDao
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
@@ -129,7 +133,7 @@ class AppModule {
      */
     @Provides
     @Singleton
-    fun provideFoodDataSource(collectionFoods: CollectionReference): FirebaseFoodDataSource {
+    fun provideFirebaseFoodDataSource(collectionFoods: CollectionReference): FirebaseFoodDataSource {
         return FirebaseFoodDataSource(collectionFoods)
     }
 
@@ -143,4 +147,40 @@ class AppModule {
     fun provideCollectionReference(): CollectionReference {
         return FirebaseFirestore.getInstance().collection("yemekler")
     }
+
+    /**
+     * FoodDao sağlayıcısını sağlar.
+     *
+     * @return FoodDao Retrofit arayüzü.
+     */
+    @Provides
+    @Singleton
+    fun provideFoodDao(): FoodDao {
+        return ApiUtils.getFoodDao()
+    }
+
+    /**
+     * FoodDataSource sağlayıcısını sağlar.
+     *
+     * @param fdao API ile yemek verilerini almak için kullanılan FoodDao nesnesi.
+     * @return FoodDataSource nesnesi.
+     */
+    @Provides
+    @Singleton
+    fun provideFoodDataSource(fdao: FoodDao): FoodDataSource {
+        return FoodDataSource(fdao)
+    }
+
+    /**
+     * FoodRepository sağlayıcısını sağlar.
+     *
+     * @param fds FoodDataSource nesnesi.
+     * @return FoodRepository nesnesi.
+     */
+    @Provides
+    @Singleton
+    fun provideFoodRepository(fds: FoodDataSource): FoodRepository {
+        return FoodRepository(fds)
+    }
+
 }

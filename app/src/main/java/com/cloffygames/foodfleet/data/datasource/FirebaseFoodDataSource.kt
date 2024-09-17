@@ -18,6 +18,8 @@ class FirebaseFoodDataSource(val collectionFoods: CollectionReference) {
     // Kategorilerin tutulacağı MutableLiveData
     val firebaseCategoryList = MutableLiveData<List<String>>()
 
+    val firebaseFoodsByCategoryList = MutableLiveData<List<FirebaseFood>>()
+
     /**
      * Firestore'dan tüm yemekleri alır ve firebaseFoodList içinde depolar.
      *
@@ -39,32 +41,6 @@ class FirebaseFoodDataSource(val collectionFoods: CollectionReference) {
                 firebaseFoodList.value = list // Verileri MutableLiveData'ya aktarır
             }
         }
-        return firebaseFoodList
-    }
-
-    /**
-     * Verilen kategoriye göre Firestore'dan yemekleri alır.
-     *
-     * @param category Aranan yemek kategorisi.
-     * @return Kategoriye göre filtrelenmiş yemeklerin bulunduğu MutableLiveData.
-     */
-    fun getFoodsByCategory(category: String): MutableLiveData<List<FirebaseFood>> {
-        // Belirtilen kategoriye göre yemekleri Firestore'dan çeker
-        collectionFoods.whereEqualTo("yemek_kategori", category)
-            .addSnapshotListener { value, error ->
-                if (value != null) {
-                    val list = ArrayList<FirebaseFood>()
-                    val documents = value.documents
-                    // Dökümanları kategoriye göre filtreleyerek listeye ekler
-                    for (d in documents) {
-                        val food = d.toObject(FirebaseFood::class.java)
-                        if (food != null) {
-                            list.add(food)
-                        }
-                    }
-                    firebaseFoodList.value = list // Filtrelenmiş yemekleri MutableLiveData'ya aktarır
-                }
-            }
         return firebaseFoodList
     }
 
