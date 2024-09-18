@@ -74,6 +74,8 @@ dependencies {
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
 
+    implementation ("androidx.compose.material:material-icons-extended:1.5.0")
+
     implementation("androidx.navigation:navigation-compose:2.7.6")
     implementation ("com.google.code.gson:gson:2.10")
 
@@ -98,5 +100,8 @@ dependencies {
 
     // Google Sign-In için play-services-auth bağımlılığı
     implementation("com.google.android.gms:play-services-auth:21.2.0")  // Sürümü ekledik
+
+    // Glide resim kütüphanesi
+    implementation ("com.github.skydoves:landscapist-glide:1.4.4")
 }
 
