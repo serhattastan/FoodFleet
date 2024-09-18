@@ -11,7 +11,7 @@ import kotlinx.coroutines.withContext
  *
  * @param fdao API ile yemek verilerini almak için kullanılan FoodDao nesnesi.
  */
-class FoodDataSource(val fdao: FoodDao) {
+class FoodDataSource(private val fdao: FoodDao) {
 
     /**
      * API'dan tüm yemek verilerini çeker.

@@ -12,7 +12,7 @@ import javax.inject.Inject
  * @param fds FirebaseFoodDataSource veri kaynağı.
  */
 class FirebaseFoodRepository @Inject constructor(
-    var fds: FirebaseFoodDataSource
+    private var fds: FirebaseFoodDataSource
 ) {
 
     /**

@@ -32,6 +32,7 @@ fun HomeScreen(
     val firebaseFoodList by viewModel.firebaseFoodList.observeAsState(emptyList())
     val firebaseCategoryList by viewModel.firebaseCategoryList.observeAsState(emptyList())
     val foodList by viewModel.foodList.observeAsState(emptyList())
+    val firebaseCouponList by viewModel.firebaseCouponList.observeAsState(emptyList())
 
     // Pager state
     val pagerState = rememberPagerState(initialPage = 0, initialPageOffsetFraction = 0f, pageCount = { foodList.size })

@@ -10,7 +10,7 @@ import javax.inject.Inject
  * @param ads AuthenticationDataSource nesnesi.
  */
 class AuthenticationRepository @Inject constructor(
-    var ads: AuthenticationDataSource
+    private var ads: AuthenticationDataSource
 ) {
     /**
      * Geçerli oturum açmış kullanıcıyı döner.

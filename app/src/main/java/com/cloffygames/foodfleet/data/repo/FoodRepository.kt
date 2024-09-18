@@ -9,7 +9,7 @@ import com.cloffygames.foodfleet.data.entity.Food
  *
  * @param fds Yemek verilerini almak için kullanılan FoodDataSource nesnesi.
  */
-class FoodRepository(val fds: FoodDataSource) {
+class FoodRepository(private val fds: FoodDataSource) {
 
     /**
      * Veri kaynağından (API) yemek verilerini alır.

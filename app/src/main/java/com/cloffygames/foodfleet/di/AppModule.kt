@@ -3,9 +3,11 @@ package com.cloffygames.foodfleet.di
 import android.app.Application
 import android.content.Context
 import com.cloffygames.foodfleet.data.datasource.AuthenticationDataSource
+import com.cloffygames.foodfleet.data.datasource.FirebaseCouponDataSource
 import com.cloffygames.foodfleet.data.datasource.FirebaseFoodDataSource
 import com.cloffygames.foodfleet.data.datasource.FoodDataSource
 import com.cloffygames.foodfleet.data.repo.AuthenticationRepository
+import com.cloffygames.foodfleet.data.repo.FirebaseCouponRepository
 import com.cloffygames.foodfleet.data.repo.FirebaseFoodRepository
 import com.cloffygames.foodfleet.data.repo.FoodRepository
 import com.cloffygames.foodfleet.retrofit.ApiUtils
@@ -20,6 +22,7 @@ import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
+import javax.inject.Named
 import javax.inject.Singleton
 
 /**
@@ -127,25 +130,69 @@ class AppModule {
 
     /**
      * FirebaseFoodDataSource sağlayıcısını sağlar.
+     * 'yemekler' koleksiyonundan veri almak için veri kaynağı sağlar.
      *
-     * @param collectionFoods Firebase Firestore koleksiyon referansı.
+     * @param collectionFoods Firebase Firestore'daki 'yemekler' koleksiyon referansı.
      * @return FirebaseFoodDataSource nesnesi.
      */
     @Provides
     @Singleton
-    fun provideFirebaseFoodDataSource(collectionFoods: CollectionReference): FirebaseFoodDataSource {
+    fun provideFirebaseFoodDataSource(@Named("foodsCollection") collectionFoods: CollectionReference): FirebaseFoodDataSource {
         return FirebaseFoodDataSource(collectionFoods)
     }
 
     /**
      * Firebase Firestore'dan 'yemekler' koleksiyonunu sağlar.
+     * Bu fonksiyon, Firestore'daki 'yemekler' koleksiyonuna referans döner.
      *
-     * @return Firebase Firestore CollectionReference nesnesi.
+     * @param firestore Firebase Firestore nesnesi.
+     * @return 'yemekler' koleksiyonu için CollectionReference.
      */
     @Provides
     @Singleton
-    fun provideCollectionReference(): CollectionReference {
-        return FirebaseFirestore.getInstance().collection("yemekler")
+    @Named("foodsCollection")
+    fun provideFoodsCollectionReference(firestore: FirebaseFirestore): CollectionReference {
+        return firestore.collection("yemekler")
+    }
+
+    /**
+     * Firebase Firestore'dan 'coupons' (kuponlar) koleksiyonunu sağlar.
+     * Bu fonksiyon, Firestore'daki 'coupons' koleksiyonuna referans döner.
+     *
+     * @param firestore Firebase Firestore nesnesi.
+     * @return 'coupons' koleksiyonu için CollectionReference.
+     */
+    @Provides
+    @Singleton
+    @Named("couponsCollection")
+    fun provideCouponsCollectionReference(firestore: FirebaseFirestore): CollectionReference {
+        return firestore.collection("coupons")
+    }
+
+    /**
+     * FirebaseCouponDataSource sağlayıcısını sağlar.
+     * 'coupons' koleksiyonundan kupon verilerini almak için veri kaynağı sağlar.
+     *
+     * @param collectionCoupons Firebase Firestore'daki 'coupons' koleksiyon referansı.
+     * @return FirebaseCouponDataSource nesnesi.
+     */
+    @Provides
+    @Singleton
+    fun provideFirebaseCouponDataSource(@Named("couponsCollection") collectionCoupons: CollectionReference): FirebaseCouponDataSource {
+        return FirebaseCouponDataSource(collectionCoupons)
+    }
+
+    /**
+     * FirebaseCouponRepository sağlayıcısını sağlar.
+     * Bu repository, kupon verileri üzerinde işlem yapmak için kullanılır.
+     *
+     * @param fds FirebaseCouponDataSource nesnesi.
+     * @return FirebaseCouponRepository nesnesi.
+     */
+    @Provides
+    @Singleton
+    fun provideFirebaseCouponRepository(fds: FirebaseCouponDataSource): FirebaseCouponRepository {
+        return FirebaseCouponRepository(fds)
     }
 
     /**
