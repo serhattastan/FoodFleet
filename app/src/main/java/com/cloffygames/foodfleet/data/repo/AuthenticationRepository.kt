@@ -9,7 +9,7 @@ import javax.inject.Inject
  *
  * @param ads AuthenticationDataSource nesnesi.
  */
-class AuthenticationRepository @Inject constructor(
+class AuthenticationRepository(
     private var ads: AuthenticationDataSource
 ) {
     /**

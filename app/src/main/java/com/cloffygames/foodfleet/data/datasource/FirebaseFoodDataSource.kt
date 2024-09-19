@@ -3,7 +3,6 @@ package com.cloffygames.foodfleet.data.datasource
 import androidx.lifecycle.MutableLiveData
 import com.cloffygames.foodfleet.data.entity.FirebaseFood
 import com.google.firebase.firestore.CollectionReference
-import javax.inject.Inject
 
 /**
  * FirebaseFoodDataSource, Firebase Firestore'dan yemek verilerini ve kategorilerini çeker.
@@ -11,7 +10,7 @@ import javax.inject.Inject
  *
  * @param collectionFoods Firestore'daki "yemekler" koleksiyonu referansı.
  */
-class FirebaseFoodDataSource @Inject constructor(private val collectionFoods: CollectionReference) {
+class FirebaseFoodDataSource(private val collectionFoods: CollectionReference) {
 
     // Yemek verilerinin tutulacağı MutableLiveData
     private val firebaseFoodList = MutableLiveData<List<FirebaseFood>>()

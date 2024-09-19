@@ -3,7 +3,6 @@ package com.cloffygames.foodfleet.data.repo
 import androidx.lifecycle.MutableLiveData
 import com.cloffygames.foodfleet.data.datasource.FirebaseFoodDataSource
 import com.cloffygames.foodfleet.data.entity.FirebaseFood
-import javax.inject.Inject
 
 /**
  * FirebaseFoodRepository, uygulama ile veri kaynağı (FirebaseFoodDataSource) arasındaki iletişimi sağlar.
@@ -11,7 +10,7 @@ import javax.inject.Inject
  *
  * @param fds FirebaseFoodDataSource veri kaynağı.
  */
-class FirebaseFoodRepository @Inject constructor(
+class FirebaseFoodRepository(
     private var fds: FirebaseFoodDataSource
 ) {
 

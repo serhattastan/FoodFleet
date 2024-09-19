@@ -3,7 +3,6 @@ package com.cloffygames.foodfleet.data.repo
 import androidx.lifecycle.MutableLiveData
 import com.cloffygames.foodfleet.data.datasource.FirebaseCouponDataSource
 import com.cloffygames.foodfleet.data.entity.FirebaseCoupon
-import javax.inject.Inject
 
 /**
  * FirebaseCouponRepository, FirebaseCouponDataSource ile veri katmanı arasında köprü görevi görür.
@@ -11,7 +10,7 @@ import javax.inject.Inject
  *
  * @param firebaseCouponDataSource Firebase Firestore'dan kupon verilerini almak için kullanılan veri kaynağı.
  */
-class FirebaseCouponRepository @Inject constructor(
+class FirebaseCouponRepository(
     private val firebaseCouponDataSource: FirebaseCouponDataSource
 ) {
 

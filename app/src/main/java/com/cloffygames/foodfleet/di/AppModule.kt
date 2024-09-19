@@ -3,14 +3,17 @@ package com.cloffygames.foodfleet.di
 import android.app.Application
 import android.content.Context
 import com.cloffygames.foodfleet.data.datasource.AuthenticationDataSource
+import com.cloffygames.foodfleet.data.datasource.CartDataSource
 import com.cloffygames.foodfleet.data.datasource.FirebaseCouponDataSource
 import com.cloffygames.foodfleet.data.datasource.FirebaseFoodDataSource
 import com.cloffygames.foodfleet.data.datasource.FoodDataSource
 import com.cloffygames.foodfleet.data.repo.AuthenticationRepository
+import com.cloffygames.foodfleet.data.repo.CartRepository
 import com.cloffygames.foodfleet.data.repo.FirebaseCouponRepository
 import com.cloffygames.foodfleet.data.repo.FirebaseFoodRepository
 import com.cloffygames.foodfleet.data.repo.FoodRepository
 import com.cloffygames.foodfleet.retrofit.ApiUtils
+import com.cloffygames.foodfleet.retrofit.CartDao
 import com.cloffygames.foodfleet.retrofit.FoodDao
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
@@ -228,6 +231,45 @@ class AppModule {
     @Singleton
     fun provideFoodRepository(fds: FoodDataSource): FoodRepository {
         return FoodRepository(fds)
+    }
+
+    /**
+     * CartDao sağlayıcısını sağlar.
+     * Retrofit istemcisi aracılığıyla sepetle ilgili API işlemlerini yapmak için kullanılır.
+     *
+     * @return CartDao nesnesi, Retrofit aracılığıyla sepet işlemlerini yönetir.
+     */
+    @Provides
+    @Singleton
+    fun provideCartDao(): CartDao {
+        // ApiUtils sınıfı aracılığıyla CartDao oluşturulur
+        return ApiUtils.getCartDao()
+    }
+
+    /**
+     * CartDataSource sağlayıcısını sağlar.
+     * Bu sınıf, CartDao aracılığıyla sepetle ilgili verileri çekmek için kullanılır.
+     *
+     * @param cartDao CartDao nesnesi, Retrofit üzerinden API işlemlerini gerçekleştirir.
+     * @return CartDataSource, CartDao ile API etkileşimlerini yöneten sınıf.
+     */
+    @Provides
+    @Singleton
+    fun provideCartDataSource(cartDao: CartDao): CartDataSource {
+        return CartDataSource(cartDao)
+    }
+
+    /**
+     * CartRepository sağlayıcısını sağlar.
+     * Bu sınıf, iş mantığını yönetmek için veri kaynaklarına erişimi sağlar.
+     *
+     * @param cartDataSource CartDataSource nesnesi, veri kaynaklarından sepet verilerini alır.
+     * @return CartRepository, uygulama iş mantığını yönetir ve veri kaynağına erişir.
+     */
+    @Provides
+    @Singleton
+    fun provideCartRepository(cartDataSource: CartDataSource): CartRepository {
+        return CartRepository(cartDataSource)
     }
 
 }
