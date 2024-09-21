@@ -25,6 +25,7 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.FilterList
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.ShoppingCart
@@ -33,6 +34,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -40,6 +42,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -51,14 +54,23 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.cloffygames.foodfleet.R
 import com.cloffygames.foodfleet.data.entity.FirebaseCoupon
 import com.cloffygames.foodfleet.data.entity.FirebaseFood
 import com.cloffygames.foodfleet.data.entity.Food
+import com.cloffygames.foodfleet.ui.theme.AddToCartButtonColor
+import com.cloffygames.foodfleet.ui.theme.BackgroundColor
+import com.cloffygames.foodfleet.ui.theme.OnPrimaryTextColor
+import com.cloffygames.foodfleet.ui.theme.OnSecondaryTextColor
+import com.cloffygames.foodfleet.ui.theme.PrimaryColor
+import com.cloffygames.foodfleet.ui.theme.PrimaryTextColor
+import com.cloffygames.foodfleet.ui.theme.SecondaryColor
+import com.cloffygames.foodfleet.ui.theme.SecondaryTextColor
+import com.cloffygames.foodfleet.ui.theme.ShimmerBaseColor
 import com.cloffygames.foodfleet.uix.uicomponent.ShimmerEffect
 import com.cloffygames.foodfleet.uix.viewmodel.HomeViewModel
 import com.skydoves.landscapist.glide.GlideImage
@@ -81,16 +93,20 @@ fun HomeScreen(
             modifier = Modifier
                 .padding(paddingValues)
                 .fillMaxSize()
+                .background(BackgroundColor)
         ) {
+            // SearchBar görünümü
+            item {
+                SearchBar(navController = navController)
+                Divider()
+                Spacer(modifier = Modifier.height(16.dp))
+            }
             // Pager ile kuponları gösterme
             item {
                 CouponPager(firebaseCouponList)
             }
 
-            // SearchBar görünümü
-            item {
-                SearchBar(navController = navController)
-            }
+
 
             // Kategoriler
             item {
@@ -107,15 +123,14 @@ fun HomeScreen(
                 FoodGrid(foodList = foodList)
             }
 
+            item {
+                Text(text = "Kategoriler", style = MaterialTheme.typography.titleLarge, color = PrimaryTextColor, modifier = Modifier.fillMaxWidth().padding(top = 16.dp), textAlign = TextAlign.Center)
+            }
+
             // Kategorilere göre yemekleri listele
             items(firebaseCategoryList) { category ->
-                Text(
-                    text = category,
-                    style = MaterialTheme.typography.bodyMedium,
-                    modifier = Modifier.padding(start = 16.dp, top = 16.dp, bottom = 8.dp)
-                )
                 val filteredFoodList = firebaseFoodList.filter { it.yemek_kategori == category }
-                CategoryFoodList(filteredFoodList)
+                CategoryFoodList(filteredFoodList, category)
             }
         }
     }
@@ -125,29 +140,34 @@ fun HomeScreen(
 @Composable
 fun HomeTopAppBar() {
     TopAppBar(
+        colors = (TopAppBarDefaults.topAppBarColors(containerColor = BackgroundColor)),
         title = {
             Column {
                 Text(
-                    text = "Kullanıcı Adresi",
-                    style = MaterialTheme.typography.bodyMedium
+                    text = "Şehit Kubilay 1703. Sk. 98 A",
+                    style = MaterialTheme.typography.labelLarge,
+                    color = PrimaryTextColor
                 )
                 Text(
                     text = "Food Fleet",
-                    style = MaterialTheme.typography.labelSmall
+                    style = MaterialTheme.typography.labelSmall,
+                    color = PrimaryTextColor
                 )
             }
         },
         navigationIcon = {
             Icon(
                 painter = painterResource(id = R.drawable.ic_launcher_foreground),
-                contentDescription = "App Icon"
+                contentDescription = "App Icon",
+                tint = PrimaryTextColor
             )
         },
         actions = {
             IconButton(onClick = { /* Canlı destek simgesi işlevi */ }) {
                 Icon(
                     painter = painterResource(id = R.drawable.ic_launcher_foreground),
-                    contentDescription = "Canlı Destek"
+                    contentDescription = "Canlı Destek",
+                    tint = PrimaryTextColor
                 )
             }
         }
@@ -161,33 +181,31 @@ fun CouponPager(firebaseCouponList: List<FirebaseCoupon>) {
     val lazyListState = rememberLazyListState()
 
     Column(modifier = Modifier.fillMaxWidth()) {
-        // LazyRow ile kuponları yatay kaydırma yapısı
         LazyRow(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(180.dp), // Sabit yükseklik
+                .height(180.dp),
             horizontalArrangement = Arrangement.spacedBy(8.dp),
             contentPadding = PaddingValues(horizontal = 16.dp),
-            state = lazyListState, // Scroll state eklenmiş
-            flingBehavior = rememberSnapFlingBehavior(lazyListState) // Fling behavior added
+            state = lazyListState,
+            flingBehavior = rememberSnapFlingBehavior(lazyListState)
         ) {
             itemsIndexed(firebaseCouponList) { index, coupon ->
                 Card(
                     modifier = Modifier
-                        .height(180.dp) // Yükseklik sabitleniyor
-                        .fillParentMaxWidth()// Sabit genişlik
+                        .height(180.dp)
+                        .fillParentMaxWidth()
                         .padding(horizontal = 2.dp),
                     shape = RoundedCornerShape(16.dp),
-                    elevation = CardDefaults.cardElevation(4.dp)
+                    elevation = CardDefaults.cardElevation(4.dp),
                 ) {
-                    // AspectRatio ile görsellerin boyutunu kontrol etmek
                     Box(modifier = Modifier.fillMaxSize()) {
                         GlideImage(
                             imageModel = coupon.coupon_image,
                             contentDescription = coupon.coupon_name,
                             modifier = Modifier
                                 .fillMaxSize()
-                                .aspectRatio(1.8f), // Sabit bir oran
+                                .aspectRatio(1.8f),
                             loading = {
                                 ShimmerEffect(modifier = Modifier.fillMaxSize())
                             }
@@ -196,11 +214,8 @@ fun CouponPager(firebaseCouponList: List<FirebaseCoupon>) {
                 }
             }
         }
-
-        // Pager Indicator'ı kuponların altında göstermek
         PagerIndicator(totalPages = firebaseCouponList.size, currentPage = currentPage)
 
-        // Page listener
         LaunchedEffect(lazyListState) {
             snapshotFlow { lazyListState.firstVisibleItemIndex }
                 .collect { currentPage = it }
@@ -215,7 +230,7 @@ fun PagerIndicator(totalPages: Int, currentPage: Int) {
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
             .fillMaxWidth()
-            .padding(top = 8.dp) // Üstten boşluk ekleniyor
+            .padding(top = 8.dp)
     ) {
         for (i in 0 until totalPages) {
             Box(
@@ -223,13 +238,11 @@ fun PagerIndicator(totalPages: Int, currentPage: Int) {
                     .padding(4.dp)
                     .size(12.dp)
                     .clip(CircleShape)
-                    .background(if (i == currentPage) Color(0xFFFFA726) else Color(0xFFE0E0E0))
+                    .background(if (i == currentPage) PrimaryColor else ShimmerBaseColor)
             )
         }
     }
 }
-
-
 
 @Composable
 fun SearchBar(navController: NavController) {
@@ -238,10 +251,11 @@ fun SearchBar(navController: NavController) {
             .fillMaxWidth()
             .padding(16.dp)
             .clickable {
-                navController.navigate("search_screen")
+                //navController.navigate("search_screen")
             },
         shape = RoundedCornerShape(24.dp),
-        elevation = CardDefaults.elevatedCardElevation(defaultElevation = 8.dp)
+        elevation = CardDefaults.elevatedCardElevation(defaultElevation = 8.dp),
+        colors = CardDefaults.cardColors(containerColor = BackgroundColor)
     ) {
         Row(
             modifier = Modifier
@@ -252,13 +266,13 @@ fun SearchBar(navController: NavController) {
             Icon(
                 imageVector = Icons.Default.Search,
                 contentDescription = "Search Icon",
-                tint = MaterialTheme.colorScheme.primary,
+                tint = PrimaryColor,
                 modifier = Modifier.padding(end = 8.dp)
             )
             Text(
                 text = "Yemek ara...",
                 style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                color = SecondaryTextColor
             )
         }
     }
@@ -285,7 +299,8 @@ fun CategoryCard(category: String) {
             .size(125.dp)
             .clickable { /* Kategoriye tıklama işlevi */ },
         shape = RoundedCornerShape(16.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+        colors = CardDefaults.cardColors(containerColor = BackgroundColor)
     ) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -300,7 +315,8 @@ fun CategoryCard(category: String) {
             Text(
                 text = category,
                 style = MaterialTheme.typography.bodySmall,
-                modifier = Modifier.padding(4.dp)
+                modifier = Modifier.padding(4.dp),
+                color = PrimaryTextColor
             )
         }
     }
@@ -318,16 +334,19 @@ fun SortAndFilterButtons() {
             onClick = { /* Sırala butonuna tıklama işlevi */ },
             modifier = Modifier.weight(1f),
             colors = ButtonDefaults.buttonColors(
-                containerColor = MaterialTheme.colorScheme.primary
-            )
+                containerColor = BackgroundColor
+            ),
+            elevation = ButtonDefaults.buttonElevation(defaultElevation = 5.dp),
+            border = ButtonDefaults.outlinedButtonBorder
         ) {
             Icon(
                 imageVector = Icons.Default.Sort,
                 contentDescription = "Sırala Icon",
-                modifier = Modifier.padding(end = 4.dp)
+                modifier = Modifier.padding(end = 4.dp),
+                tint = OnPrimaryTextColor
             )
             Spacer(modifier = Modifier.width(8.dp))
-            Text(text = "Sırala")
+            Text(text = "Sırala", color = OnPrimaryTextColor)
         }
 
         Spacer(modifier = Modifier.width(8.dp))
@@ -336,8 +355,10 @@ fun SortAndFilterButtons() {
             onClick = { /* Filtrele butonuna tıklama işlevi */ },
             modifier = Modifier.weight(1f),
             colors = ButtonDefaults.buttonColors(
-                containerColor = MaterialTheme.colorScheme.secondary
-            )
+                containerColor = SecondaryColor
+            ),
+            elevation = ButtonDefaults.buttonElevation(defaultElevation = 5.dp),
+            border = ButtonDefaults.outlinedButtonBorder
         ) {
             Icon(
                 imageVector = Icons.Default.FilterList,
@@ -345,7 +366,7 @@ fun SortAndFilterButtons() {
                 modifier = Modifier.padding(end = 4.dp)
             )
             Spacer(modifier = Modifier.width(8.dp))
-            Text(text = "Filtrele")
+            Text(text = "Filtrele", color = OnSecondaryTextColor)
         }
     }
 }
@@ -374,20 +395,20 @@ fun FoodGrid(foodList: List<Food>) {
 fun FoodCard(food: Food) {
     Card(
         modifier = Modifier
-            .size(160.dp, 155.dp) // Kart boyutu küçültüldü
-            .clickable { /* Yemeğe tıklama işlevi */ }.padding(top = 4.dp),
+            .size(160.dp, 155.dp)
+            .clickable { /* Yemeğe tıklama işlevi */ },
         shape = RoundedCornerShape(16.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+        colors = CardDefaults.cardColors(containerColor = BackgroundColor)
     ) {
         Column(
             modifier = Modifier.fillMaxSize(),
             verticalArrangement = Arrangement.SpaceBetween
         ) {
-            // Yemeğin görseli
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(110.dp) // Görsel yüksekliği ayarlandı
+                    .height(110.dp)
             ) {
                 GlideImage(
                     imageModel = "http://kasimadalan.pe.hu/yemekler/resimler/${food.yemek_resim_adi}",
@@ -397,13 +418,12 @@ fun FoodCard(food: Food) {
                 )
             }
 
-            // Yemek ismi, fiyatı ve sepete ekleme butonu bir Row içinde
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 8.dp, vertical = 4.dp), // Yatay padding azaltıldı
-                horizontalArrangement = Arrangement.SpaceBetween, // Elemanları yatayda ayır
-                verticalAlignment = Alignment.CenterVertically // Dikeyde hizalama
+                    .padding(horizontal = 8.dp, vertical = 4.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
             ) {
                 Column(
                     modifier = Modifier.weight(1f)
@@ -411,24 +431,34 @@ fun FoodCard(food: Food) {
                     Text(
                         text = food.yemek_adi,
                         style = MaterialTheme.typography.bodyMedium,
-                        color = Color.Black
+                        color = PrimaryTextColor
                     )
                     Text(
                         text = "${food.yemek_fiyat} TL",
                         style = MaterialTheme.typography.bodySmall,
-                        color = Color.Gray
+                        color = SecondaryTextColor
                     )
                 }
 
-                // Sepete ekleme butonu
                 IconButton(
                     onClick = { /* Sepete ekle işlemi */ },
-                    modifier = Modifier.size(24.dp) // Buton boyutu küçültüldü
+                    modifier = Modifier.size(24.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.FavoriteBorder,
+                        contentDescription = "Add to Cart",
+                        tint = AddToCartButtonColor
+                    )
+                }
+
+                IconButton(
+                    onClick = { /* Sepete ekle işlemi */ },
+                    modifier = Modifier.size(24.dp)
                 ) {
                     Icon(
                         imageVector = Icons.Default.ShoppingCart,
                         contentDescription = "Add to Cart",
-                        tint = MaterialTheme.colorScheme.primary
+                        tint = AddToCartButtonColor
                     )
                 }
             }
@@ -440,20 +470,20 @@ fun FoodCard(food: Food) {
 fun FoodCardFirebase(food: FirebaseFood) {
     Card(
         modifier = Modifier
-            .size(160.dp, 155.dp) // Kart boyutu küçültüldü
+            .size(225.dp, 155.dp)
             .clickable { /* Yemeğe tıklama işlevi */ },
         shape = RoundedCornerShape(16.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+        colors = CardDefaults.cardColors(containerColor = BackgroundColor)
     ) {
         Column(
             modifier = Modifier.fillMaxSize(),
             verticalArrangement = Arrangement.SpaceBetween
         ) {
-            // Yemeğin görseli
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(110.dp) // Görsel yüksekliği ayarlandı
+                    .height(110.dp)
             ) {
                 GlideImage(
                     imageModel = food.yemek_resim_adi,
@@ -463,38 +493,47 @@ fun FoodCardFirebase(food: FirebaseFood) {
                 )
             }
 
-            // Yemek ismi, fiyatı ve sepete ekleme butonu bir Row içinde
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 8.dp, vertical = 4.dp), // Yatay padding azaltıldı
-                horizontalArrangement = Arrangement.SpaceBetween, // Elemanları yatayda ayır
-                verticalAlignment = Alignment.CenterVertically // Dikeyde hizalama
+                    .padding(horizontal = 8.dp, vertical = 4.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
             ) {
                 Column(
                     modifier = Modifier.weight(1f)
                 ) {
                     Text(
                         text = food.yemek_adi,
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = Color.Black
+                        style = MaterialTheme.typography.labelLarge,
+                        color = PrimaryTextColor
                     )
                     Text(
                         text = "${food.yemek_fiyat} TL",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = Color.Gray
+                        style = MaterialTheme.typography.labelSmall,
+                        color = SecondaryTextColor
                     )
                 }
 
-                // Sepete ekleme butonu
                 IconButton(
                     onClick = { /* Sepete ekle işlemi */ },
-                    modifier = Modifier.size(24.dp) // Buton boyutu küçültüldü
+                    modifier = Modifier.size(24.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.FavoriteBorder,
+                        contentDescription = "Add to Cart",
+                        tint = AddToCartButtonColor
+                    )
+                }
+
+                IconButton(
+                    onClick = { /* Sepete ekle işlemi */ },
+                    modifier = Modifier.size(24.dp)
                 ) {
                     Icon(
                         imageVector = Icons.Default.ShoppingCart,
                         contentDescription = "Add to Cart",
-                        tint = MaterialTheme.colorScheme.primary
+                        tint = AddToCartButtonColor
                     )
                 }
             }
@@ -503,15 +542,24 @@ fun FoodCardFirebase(food: FirebaseFood) {
 }
 
 @Composable
-fun CategoryFoodList(filteredFoodList: List<FirebaseFood>) {
-    LazyRow(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 8.dp), // Kartlar arasındaki boşluklar azaltıldı
-        horizontalArrangement = Arrangement.spacedBy(8.dp) // Boşluk miktarı azaltıldı
-    ) {
-        items(filteredFoodList) { food ->
-            FoodCardFirebase(food = food)
+fun CategoryFoodList(filteredFoodList: List<FirebaseFood>, category: String) {
+    Column {
+        Text(
+            text = category,
+            style = MaterialTheme.typography.titleLarge,
+            modifier = Modifier.padding(start = 16.dp, top = 16.dp, bottom = 8.dp, end = 16.dp),
+            color = PrimaryTextColor,
+        )
+        LazyRow(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 8.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            items(filteredFoodList) { food ->
+                FoodCardFirebase(food = food)
+            }
         }
     }
+
 }
