@@ -25,8 +25,10 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.FilterList
+import androidx.compose.material.icons.filled.ManageAccounts
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material.icons.filled.Sort
@@ -82,7 +84,7 @@ fun HomeScreen(
 ) {
     // ViewModel'den verileri gözlemleyin
     val firebaseFoodList by viewModel.firebaseFoodList.observeAsState(emptyList())
-    val firebaseCategoryList by viewModel.firebaseCategoryList.observeAsState(emptyList())
+    val firebaseCategoryList by viewModel.firebaseCategoryList.observeAsState(emptyMap())
     val foodList by viewModel.foodList.observeAsState(emptyList())
     val firebaseCouponList by viewModel.firebaseCouponList.observeAsState(emptyList())
 
@@ -128,7 +130,7 @@ fun HomeScreen(
             }
 
             // Kategorilere göre yemekleri listele
-            items(firebaseCategoryList) { category ->
+            items(firebaseCategoryList.keys.toList()) { category ->
                 val filteredFoodList = firebaseFoodList.filter { it.yemek_kategori == category }
                 CategoryFoodList(filteredFoodList, category)
             }
@@ -157,17 +159,25 @@ fun HomeTopAppBar() {
         },
         navigationIcon = {
             Icon(
-                painter = painterResource(id = R.drawable.ic_launcher_foreground),
+                imageVector = Icons.Default.ManageAccounts,
                 contentDescription = "App Icon",
-                tint = PrimaryTextColor
+                tint = PrimaryTextColor,
+                modifier = Modifier.padding(start = 8.dp, end = 8.dp).size(32.dp)
             )
         },
         actions = {
+            IconButton(onClick = { /* Profil simgesi işlevi */ }) {
+                Icon(
+                    imageVector = Icons.Default.Favorite,
+                    contentDescription = "Favoriler Icon",
+                    tint = AddToCartButtonColor
+                )
+            }
             IconButton(onClick = { /* Canlı destek simgesi işlevi */ }) {
                 Icon(
-                    painter = painterResource(id = R.drawable.ic_launcher_foreground),
-                    contentDescription = "Canlı Destek",
-                    tint = PrimaryTextColor
+                    imageVector = Icons.Default.ShoppingCart,
+                    contentDescription = "Sepet Icon",
+                    tint = AddToCartButtonColor
                 )
             }
         }
@@ -279,21 +289,21 @@ fun SearchBar(navController: NavController) {
 }
 
 @Composable
-fun CategoryList(categories: List<String>) {
+fun CategoryList(categories: Map<String, String>) {
     LazyRow(
         modifier = Modifier
             .fillMaxWidth()
             .padding(16.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        items(categories) { category ->
-            CategoryCard(category = category)
+        items(categories.keys.toList()) { category ->
+            CategoryCard(category = category.toString(), imageUrl = categories[category])
         }
     }
 }
 
 @Composable
-fun CategoryCard(category: String) {
+fun CategoryCard(category: String, imageUrl: String?) {
     Card(
         modifier = Modifier
             .size(125.dp)
@@ -307,7 +317,7 @@ fun CategoryCard(category: String) {
             verticalArrangement = Arrangement.Center
         ) {
             GlideImage(
-                imageModel = "http://kasimadalan.pe.hu/yemekler/resimler/ayran.png",
+                imageModel = imageUrl,
                 contentDescription = "Food Image",
                 modifier = Modifier.size(150.dp, 100.dp),
                 loading = { ShimmerEffect(modifier = Modifier.fillMaxSize()) }
@@ -315,7 +325,7 @@ fun CategoryCard(category: String) {
             Text(
                 text = category,
                 style = MaterialTheme.typography.bodySmall,
-                modifier = Modifier.padding(4.dp),
+                modifier = Modifier.padding(4.dp).align(Alignment.CenterHorizontally),
                 color = PrimaryTextColor
             )
         }

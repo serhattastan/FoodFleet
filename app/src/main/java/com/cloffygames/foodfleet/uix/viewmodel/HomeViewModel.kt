@@ -34,7 +34,7 @@ class HomeViewModel @Inject constructor(
     val firebaseFoodList: LiveData<List<FirebaseFood>> = firebaseFoodRepository.getFoodsFromFireStore()
 
     // Firebase'deki yemek kategorileri LiveData olarak tutulur
-    val firebaseCategoryList: LiveData<List<String>> = firebaseFoodRepository.getCategoriesFromFoods()
+    val firebaseCategoryList: LiveData<Map<String, String>> = firebaseFoodRepository.getCategoriesWithImageUrls()
 
     // Firebase'den çekilen kupon listesi LiveData olarak tutulur
     val firebaseCouponList: LiveData<List<FirebaseCoupon>> = firebaseCouponRepository.getCouponsFromFireStore()

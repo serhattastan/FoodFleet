@@ -26,5 +26,5 @@ class FirebaseFoodRepository(
      *
      * @return MutableLiveData içinde benzersiz kategoriler listesi döner.
      */
-    fun getCategoriesFromFoods(): MutableLiveData<List<String>> = fds.getCategoriesFromFoods()
+    fun getCategoriesWithImageUrls(): MutableLiveData<Map<String, String>> = fds.getCategoriesWithImageUrls()
 }
