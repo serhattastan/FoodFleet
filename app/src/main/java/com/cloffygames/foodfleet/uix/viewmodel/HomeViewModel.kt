@@ -17,10 +17,10 @@ import javax.inject.Inject
 
 /**
  * HomeViewModel, yemek ve kupon verilerini yöneten ViewModel sınıfıdır.
- * Firebase'den ve diğer kaynaklardan gelen yemek ve kupon verilerini UI katmanına sunar.
+ * Firebase'den ve API'dan gelen yemek ve kupon verilerini UI katmanına sunar.
  *
  * @param firebaseFoodRepository Firestore'dan yemek verilerini sağlayan repository.
- * @param frepo Diğer yemek verilerini sağlayan repository.
+ * @param frepo API yemek verilerini sağlayan repository.
  * @param firebaseCouponRepository Firestore'dan kupon verilerini sağlayan repository.
  */
 @HiltViewModel
@@ -48,7 +48,7 @@ class HomeViewModel @Inject constructor(
     }
 
     /**
-     * REST API veya başka bir kaynaktan yemek verilerini alır ve foodList'e atar.
+     * REST API'dan yemek verilerini alır ve foodList'e atar.
      * Bu işlem arka planda yapılır (Main dispatcher ile UI'da sonuç gösterilir).
      */
     private fun getFoods() {

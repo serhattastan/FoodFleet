@@ -104,5 +104,6 @@ dependencies {
     // Glide resim kütüphanesi
     implementation ("com.github.skydoves:landscapist-glide:1.4.4")
 
+
 }
 
