@@ -1,12 +1,16 @@
 package com.cloffygames.foodfleet.uix.view
 
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.snapping.rememberSnapFlingBehavior
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -16,6 +20,9 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.FilterList
@@ -34,22 +41,28 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.cloffygames.foodfleet.R
+import com.cloffygames.foodfleet.data.entity.FirebaseCoupon
 import com.cloffygames.foodfleet.data.entity.FirebaseFood
 import com.cloffygames.foodfleet.data.entity.Food
 import com.cloffygames.foodfleet.uix.uicomponent.ShimmerEffect
 import com.cloffygames.foodfleet.uix.viewmodel.HomeViewModel
 import com.skydoves.landscapist.glide.GlideImage
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
     viewModel: HomeViewModel,
@@ -69,6 +82,11 @@ fun HomeScreen(
                 .padding(paddingValues)
                 .fillMaxSize()
         ) {
+            // Pager ile kuponları gösterme
+            item {
+                CouponPager(firebaseCouponList)
+            }
+
             // SearchBar görünümü
             item {
                 SearchBar(navController = navController)
@@ -135,6 +153,83 @@ fun HomeTopAppBar() {
         }
     )
 }
+
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+fun CouponPager(firebaseCouponList: List<FirebaseCoupon>) {
+    var currentPage by remember { mutableStateOf(0) }
+    val lazyListState = rememberLazyListState()
+
+    Column(modifier = Modifier.fillMaxWidth()) {
+        // LazyRow ile kuponları yatay kaydırma yapısı
+        LazyRow(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(180.dp), // Sabit yükseklik
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            contentPadding = PaddingValues(horizontal = 16.dp),
+            state = lazyListState, // Scroll state eklenmiş
+            flingBehavior = rememberSnapFlingBehavior(lazyListState) // Fling behavior added
+        ) {
+            itemsIndexed(firebaseCouponList) { index, coupon ->
+                Card(
+                    modifier = Modifier
+                        .height(180.dp) // Yükseklik sabitleniyor
+                        .fillParentMaxWidth()// Sabit genişlik
+                        .padding(horizontal = 2.dp),
+                    shape = RoundedCornerShape(16.dp),
+                    elevation = CardDefaults.cardElevation(4.dp)
+                ) {
+                    // AspectRatio ile görsellerin boyutunu kontrol etmek
+                    Box(modifier = Modifier.fillMaxSize()) {
+                        GlideImage(
+                            imageModel = coupon.coupon_image,
+                            contentDescription = coupon.coupon_name,
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .aspectRatio(1.8f), // Sabit bir oran
+                            loading = {
+                                ShimmerEffect(modifier = Modifier.fillMaxSize())
+                            }
+                        )
+                    }
+                }
+            }
+        }
+
+        // Pager Indicator'ı kuponların altında göstermek
+        PagerIndicator(totalPages = firebaseCouponList.size, currentPage = currentPage)
+
+        // Page listener
+        LaunchedEffect(lazyListState) {
+            snapshotFlow { lazyListState.firstVisibleItemIndex }
+                .collect { currentPage = it }
+        }
+    }
+}
+
+@Composable
+fun PagerIndicator(totalPages: Int, currentPage: Int) {
+    Row(
+        horizontalArrangement = Arrangement.Center,
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(top = 8.dp) // Üstten boşluk ekleniyor
+    ) {
+        for (i in 0 until totalPages) {
+            Box(
+                modifier = Modifier
+                    .padding(4.dp)
+                    .size(12.dp)
+                    .clip(CircleShape)
+                    .background(if (i == currentPage) Color(0xFFFFA726) else Color(0xFFE0E0E0))
+            )
+        }
+    }
+}
+
+
 
 @Composable
 fun SearchBar(navController: NavController) {
@@ -406,9 +501,6 @@ fun FoodCardFirebase(food: FirebaseFood) {
         }
     }
 }
-
-
-
 
 @Composable
 fun CategoryFoodList(filteredFoodList: List<FirebaseFood>) {
