@@ -6,9 +6,10 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.cloffygames.foodfleet.uix.viewmodel.AuthViewModel
 import com.cloffygames.foodfleet.uix.viewmodel.HomeViewModel
+import com.cloffygames.foodfleet.uix.viewmodel.ProfileDetailViewModel
 
 @Composable
-fun Transitions(authViewModel: AuthViewModel, homeViewModel: HomeViewModel){
+fun Transitions(authViewModel: AuthViewModel, homeViewModel: HomeViewModel, profileDetailViewModel: ProfileDetailViewModel){
     val navController = rememberNavController()
     NavHost(navController = navController, startDestination = if (authViewModel.isUserLoggedIn()) "HomeScreen" else "AuthScreen"){
         composable("AuthScreen"){
@@ -16,6 +17,9 @@ fun Transitions(authViewModel: AuthViewModel, homeViewModel: HomeViewModel){
         }
         composable("HomeScreen"){
             HomeScreen(homeViewModel, navController)
+        }
+        composable("ProfileDetailScreen"){
+            ProfileDetailScreen(profileDetailViewModel, navController)
         }
 
     }

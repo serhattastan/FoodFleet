@@ -229,7 +229,7 @@ fun RegisterScreen(onLoginClick: () -> Unit, authViewModel: AuthViewModel, navCo
                     authViewModel.register(email, password) { success, error ->
                         if (success) {
                             // Kayıt başarılı olduğunda HomeScreen'e yönlendirme
-                            navController.navigate("HomeScreen") {
+                            navController.navigate("ProfileDetailScreen") {
                                 popUpTo("AuthScreen") { inclusive = true }  // LoginScreen'i yığından çıkar
                                 launchSingleTop = true  // Aynı ekranı üst üste açmayı engelle
                             }

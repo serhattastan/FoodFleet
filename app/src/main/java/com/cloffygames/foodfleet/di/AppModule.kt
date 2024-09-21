@@ -7,11 +7,13 @@ import com.cloffygames.foodfleet.data.datasource.CartDataSource
 import com.cloffygames.foodfleet.data.datasource.FirebaseCouponDataSource
 import com.cloffygames.foodfleet.data.datasource.FirebaseFoodDataSource
 import com.cloffygames.foodfleet.data.datasource.FoodDataSource
+import com.cloffygames.foodfleet.data.datasource.UserDataSource
 import com.cloffygames.foodfleet.data.repo.AuthenticationRepository
 import com.cloffygames.foodfleet.data.repo.CartRepository
 import com.cloffygames.foodfleet.data.repo.FirebaseCouponRepository
 import com.cloffygames.foodfleet.data.repo.FirebaseFoodRepository
 import com.cloffygames.foodfleet.data.repo.FoodRepository
+import com.cloffygames.foodfleet.data.repo.UserRepository
 import com.cloffygames.foodfleet.retrofit.ApiUtils
 import com.cloffygames.foodfleet.retrofit.CartDao
 import com.cloffygames.foodfleet.retrofit.FoodDao
@@ -271,5 +273,18 @@ class AppModule {
     fun provideCartRepository(cartDataSource: CartDataSource): CartRepository {
         return CartRepository(cartDataSource)
     }
+
+    @Provides
+    @Singleton
+    fun provideUserDataSource(firestore: FirebaseFirestore, firebaseAuth: FirebaseAuth): UserDataSource {
+        return UserDataSource(firestore, firebaseAuth)
+    }
+
+    @Provides
+    @Singleton
+    fun provideUserRepository(userDataSource: UserDataSource): UserRepository {
+        return UserRepository(userDataSource)
+    }
+
 
 }
