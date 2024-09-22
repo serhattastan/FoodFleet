@@ -57,4 +57,6 @@ class AuthenticationRepository(
      * @return GoogleSignInClient nesnesi.
      */
     fun getGoogleSignInClient() = ads.getGoogleSignInClient()
+
+    fun logout(onResult: () -> Unit) = ads.logout(onResult)
 }

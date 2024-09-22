@@ -89,7 +89,7 @@ fun HomeScreen(
     val firebaseCouponList by viewModel.firebaseCouponList.observeAsState(emptyList())
 
     Scaffold(
-        topBar = { HomeTopAppBar() }
+        topBar = { HomeTopAppBar(navController) }
     ) { paddingValues ->
         LazyColumn(
             modifier = Modifier
@@ -140,7 +140,7 @@ fun HomeScreen(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HomeTopAppBar() {
+fun HomeTopAppBar(navController: NavController) {
     TopAppBar(
         colors = (TopAppBarDefaults.topAppBarColors(containerColor = BackgroundColor)),
         title = {
@@ -162,7 +162,7 @@ fun HomeTopAppBar() {
                 imageVector = Icons.Default.ManageAccounts,
                 contentDescription = "App Icon",
                 tint = PrimaryTextColor,
-                modifier = Modifier.padding(start = 8.dp, end = 8.dp).size(32.dp)
+                modifier = Modifier.padding(start = 8.dp, end = 8.dp).size(32.dp).clickable { navController.navigate("ProfileScreen") }
             )
         },
         actions = {

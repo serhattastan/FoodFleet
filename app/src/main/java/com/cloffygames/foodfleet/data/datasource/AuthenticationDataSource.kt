@@ -89,4 +89,9 @@ class AuthenticationDataSource(private val firebaseAuth: FirebaseAuth, private v
         return googleSignInClient
     }
 
+    fun logout(onResult: () -> Unit) {
+        firebaseAuth.signOut()
+        onResult()
+    }
+
 }

@@ -10,6 +10,7 @@ import com.cloffygames.foodfleet.uix.view.Transitions
 import com.cloffygames.foodfleet.uix.viewmodel.AuthViewModel
 import com.cloffygames.foodfleet.uix.viewmodel.HomeViewModel
 import com.cloffygames.foodfleet.uix.viewmodel.ProfileDetailViewModel
+import com.cloffygames.foodfleet.uix.viewmodel.ProfileViewModel
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -17,13 +18,14 @@ class MainActivity : ComponentActivity() {
     val authViewModel : AuthViewModel by viewModels()
     val homeViewModel : HomeViewModel by viewModels()
     val profileDetailViewModel : ProfileDetailViewModel by viewModels()
+    val profileViewModel : ProfileViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
             FoodFleetTheme {
-                Transitions(authViewModel, homeViewModel, profileDetailViewModel)
+                Transitions(authViewModel, homeViewModel, profileDetailViewModel, profileViewModel)
             }
         }
     }

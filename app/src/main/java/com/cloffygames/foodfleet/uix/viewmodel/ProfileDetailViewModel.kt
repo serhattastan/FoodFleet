@@ -19,15 +19,4 @@ class ProfileDetailViewModel @Inject constructor(
         }
     }
 
-    fun getUser(onSuccess: (User) -> Unit, onFailure: (Exception) -> Unit) {
-        viewModelScope.launch {
-            userRepository.getUser(onSuccess, onFailure)
-        }
-    }
-
-    fun updateUser(user: User, onSuccess: () -> Unit, onFailure: (Exception) -> Unit) {
-        viewModelScope.launch {
-            userRepository.updateUser(user, onSuccess, onFailure)
-        }
-    }
 }
