@@ -1,5 +1,6 @@
 package com.cloffygames.foodfleet.uix.view
 
+import android.net.Uri
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -56,11 +57,9 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import com.cloffygames.foodfleet.R
 import com.cloffygames.foodfleet.data.entity.FirebaseCoupon
 import com.cloffygames.foodfleet.data.entity.FirebaseFood
 import com.cloffygames.foodfleet.data.entity.Food
@@ -75,6 +74,7 @@ import com.cloffygames.foodfleet.ui.theme.SecondaryTextColor
 import com.cloffygames.foodfleet.ui.theme.ShimmerBaseColor
 import com.cloffygames.foodfleet.uix.uicomponent.ShimmerEffect
 import com.cloffygames.foodfleet.uix.viewmodel.HomeViewModel
+import com.google.gson.Gson
 import com.skydoves.landscapist.glide.GlideImage
 
 @Composable
@@ -122,7 +122,7 @@ fun HomeScreen(
 
             // Yana kaydırılabilir grid
             item {
-                FoodGrid(foodList = foodList)
+                FoodGrid(foodList = foodList, navController = navController)
             }
 
             item {
@@ -132,7 +132,7 @@ fun HomeScreen(
             // Kategorilere göre yemekleri listele
             items(firebaseCategoryList.keys.toList()) { category ->
                 val filteredFoodList = firebaseFoodList.filter { it.yemek_kategori == category }
-                CategoryFoodList(filteredFoodList, category)
+                CategoryFoodList(filteredFoodList, category, navController)
             }
         }
     }
@@ -382,7 +382,7 @@ fun SortAndFilterButtons() {
 }
 
 @Composable
-fun FoodGrid(foodList: List<Food>) {
+fun FoodGrid(foodList: List<Food>, navController: NavController) {
     LazyRow(
         modifier = Modifier
             .fillMaxWidth()
@@ -394,7 +394,7 @@ fun FoodGrid(foodList: List<Food>) {
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 rowItems.forEach { food ->
-                    FoodCard(food = food)
+                    FoodCard(food = food, navController = navController)
                 }
             }
         }
@@ -402,11 +402,14 @@ fun FoodGrid(foodList: List<Food>) {
 }
 
 @Composable
-fun FoodCard(food: Food) {
+fun FoodCard(food: Food, navController: NavController) {
     Card(
         modifier = Modifier
             .size(160.dp, 155.dp)
-            .clickable { /* Yemeğe tıklama işlevi */ },
+            .clickable {
+                val json = Gson().toJson(food)
+                navController.navigate("FoodDetailScreen/${json}"
+                ) },
         shape = RoundedCornerShape(16.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
         colors = CardDefaults.cardColors(containerColor = BackgroundColor)
@@ -477,11 +480,15 @@ fun FoodCard(food: Food) {
 }
 
 @Composable
-fun FoodCardFirebase(food: FirebaseFood) {
+fun FoodCardFirebase(food: FirebaseFood, navController: NavController) {
     Card(
         modifier = Modifier
             .size(225.dp, 155.dp)
-            .clickable { /* Yemeğe tıklama işlevi */ },
+            .clickable {
+                val transitionFood = Food(food.yemek_id, food.yemek_adi, food.yemek_resim_adi, food.yemek_fiyat.toInt())
+                val json = Uri.encode(Gson().toJson(transitionFood))
+                navController.navigate("FoodDetailScreen/${json}")
+            },
         shape = RoundedCornerShape(16.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
         colors = CardDefaults.cardColors(containerColor = BackgroundColor)
@@ -552,7 +559,7 @@ fun FoodCardFirebase(food: FirebaseFood) {
 }
 
 @Composable
-fun CategoryFoodList(filteredFoodList: List<FirebaseFood>, category: String) {
+fun CategoryFoodList(filteredFoodList: List<FirebaseFood>, category: String, navController: NavController) {
     Column {
         Text(
             text = category,
@@ -567,7 +574,7 @@ fun CategoryFoodList(filteredFoodList: List<FirebaseFood>, category: String) {
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             items(filteredFoodList) { food ->
-                FoodCardFirebase(food = food)
+                FoodCardFirebase(food = food, navController = navController)
             }
         }
     }
