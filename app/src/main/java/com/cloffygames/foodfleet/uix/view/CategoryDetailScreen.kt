@@ -1,0 +1,187 @@
+package com.cloffygames.foodfleet.uix.view
+
+import android.net.Uri
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.FavoriteBorder
+import androidx.compose.material.icons.filled.ShoppingCart
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
+import com.cloffygames.foodfleet.data.entity.FirebaseFood
+import com.cloffygames.foodfleet.data.entity.Food
+import com.cloffygames.foodfleet.ui.theme.AddToCartButtonColor
+import com.cloffygames.foodfleet.ui.theme.BackgroundColor
+import com.cloffygames.foodfleet.ui.theme.PrimaryTextColor
+import com.cloffygames.foodfleet.ui.theme.SecondaryTextColor
+import com.cloffygames.foodfleet.uix.uicomponent.ShimmerEffect
+import com.cloffygames.foodfleet.uix.viewmodel.CategoryDetailScreenViewModel
+import com.google.gson.Gson
+import com.skydoves.landscapist.glide.GlideImage
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun CategoryDetailScreen(
+    category: String,
+    navController: NavController,
+    viewModel: CategoryDetailScreenViewModel
+) {
+    // Gözlemlenen veri listeleri
+    val foodList = viewModel.firebaseFoodList.observeAsState(emptyList()).value
+        .filter { it.yemek_kategori == category }
+
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text(text = category, color = PrimaryTextColor) },
+                navigationIcon = {
+                    IconButton(onClick = { navController.popBackStack() }) {
+                        Icon(Icons.Default.ArrowBack, contentDescription = "Back", tint = PrimaryTextColor)
+                    }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = BackgroundColor)
+            )
+        }
+    ) { paddingValues ->
+        if (foodList.isNotEmpty()) {
+            LazyColumn(
+                modifier = Modifier
+                    .padding(paddingValues)
+                    .fillMaxSize()
+                    .background(BackgroundColor),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                items(foodList) { food ->
+                    CategoryDetailCard(food, navController)
+                }
+            }
+        } else {
+            // Boş bir durum ekranı göster
+            Box(
+                contentAlignment = Alignment.Center,
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(BackgroundColor)
+            ) {
+                Text(
+                    text = "No items available in $category",
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = PrimaryTextColor
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun CategoryDetailCard(food: FirebaseFood, navController: NavController) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(225.dp)
+            .padding(horizontal = 8.dp, vertical = 16.dp)
+            .shadow(elevation = 4.dp)
+            .clickable {
+                val transitionFood = Food(food.yemek_id, food.yemek_adi, food.yemek_resim_adi, food.yemek_fiyat.toInt())
+                val json = Uri.encode(Gson().toJson(transitionFood))
+                navController.navigate("FoodDetailScreen/${json}")
+            },
+        shape = RoundedCornerShape(16.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+        colors = CardDefaults.cardColors(containerColor = BackgroundColor)
+    ) {
+        Column(
+            modifier = Modifier.fillMaxSize(),
+            verticalArrangement = Arrangement.SpaceBetween
+        ) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(140.dp)
+            ) {
+                GlideImage(
+                    imageModel = food.yemek_resim_adi,
+                    contentDescription = food.yemek_adi,
+                    modifier = Modifier.fillMaxSize(),
+                    loading = { ShimmerEffect(modifier = Modifier.fillMaxSize()) }
+                )
+            }
+
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 8.dp, vertical = 4.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column(
+                    modifier = Modifier.weight(1f)
+                ) {
+                    Text(
+                        text = food.yemek_adi,
+                        style = MaterialTheme.typography.labelLarge,
+                        color = PrimaryTextColor
+                    )
+                    Text(
+                        text = "${food.yemek_fiyat} TL",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = SecondaryTextColor
+                    )
+                }
+
+                IconButton(
+                    onClick = { /* Sepete ekle işlemi */ },
+                    modifier = Modifier.size(24.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.FavoriteBorder,
+                        contentDescription = "Add to Cart",
+                        tint = AddToCartButtonColor
+                    )
+                }
+
+                IconButton(
+                    onClick = { /* Sepete ekle işlemi */ },
+                    modifier = Modifier.size(24.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.ShoppingCart,
+                        contentDescription = "Add to Cart",
+                        tint = AddToCartButtonColor
+                    )
+                }
+            }
+        }
+    }
+}

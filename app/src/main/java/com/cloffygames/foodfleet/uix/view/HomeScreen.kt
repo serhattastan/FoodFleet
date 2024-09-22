@@ -26,18 +26,17 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Sort
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.FilterList
 import androidx.compose.material.icons.filled.ManageAccounts
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.ShoppingCart
-import androidx.compose.material.icons.filled.Sort
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -46,10 +45,12 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -88,8 +89,18 @@ fun HomeScreen(
     val foodList by viewModel.foodList.observeAsState(emptyList())
     val firebaseCouponList by viewModel.firebaseCouponList.observeAsState(emptyList())
 
+    var userAddress by remember { mutableStateOf("") }
+    LaunchedEffect(Unit) {
+        viewModel.getUser(
+            onSuccess = { user ->
+                userAddress = user.user_address
+            },
+            onFailure = { /* Hata işleme kodu */ }
+        )
+    }
+
     Scaffold(
-        topBar = { HomeTopAppBar(navController) }
+        topBar = { HomeTopAppBar(navController, userAddress) }
     ) { paddingValues ->
         LazyColumn(
             modifier = Modifier
@@ -100,7 +111,7 @@ fun HomeScreen(
             // SearchBar görünümü
             item {
                 SearchBar(navController = navController)
-                Divider()
+                VerticalDivider()
                 Spacer(modifier = Modifier.height(16.dp))
             }
             // Pager ile kuponları gösterme
@@ -112,7 +123,7 @@ fun HomeScreen(
 
             // Kategoriler
             item {
-                CategoryList(firebaseCategoryList)
+                CategoryList(firebaseCategoryList, navController)
             }
 
             // Sırala ve Filtrele butonları
@@ -140,13 +151,13 @@ fun HomeScreen(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HomeTopAppBar(navController: NavController) {
+fun HomeTopAppBar(navController: NavController, userAddress: String) {
     TopAppBar(
         colors = (TopAppBarDefaults.topAppBarColors(containerColor = BackgroundColor)),
         title = {
             Column {
                 Text(
-                    text = "Şehit Kubilay 1703. Sk. 98 A",
+                    text = userAddress,
                     style = MaterialTheme.typography.labelLarge,
                     color = PrimaryTextColor
                 )
@@ -187,7 +198,7 @@ fun HomeTopAppBar(navController: NavController) {
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun CouponPager(firebaseCouponList: List<FirebaseCoupon>) {
-    var currentPage by remember { mutableStateOf(0) }
+    var currentPage by remember { mutableIntStateOf(0) }
     val lazyListState = rememberLazyListState()
 
     Column(modifier = Modifier.fillMaxWidth()) {
@@ -200,7 +211,7 @@ fun CouponPager(firebaseCouponList: List<FirebaseCoupon>) {
             state = lazyListState,
             flingBehavior = rememberSnapFlingBehavior(lazyListState)
         ) {
-            itemsIndexed(firebaseCouponList) { index, coupon ->
+            itemsIndexed(firebaseCouponList) { _, coupon ->
                 Card(
                     modifier = Modifier
                         .height(180.dp)
@@ -289,7 +300,7 @@ fun SearchBar(navController: NavController) {
 }
 
 @Composable
-fun CategoryList(categories: Map<String, String>) {
+fun CategoryList(categories: Map<String, String>, navController: NavController) {
     LazyRow(
         modifier = Modifier
             .fillMaxWidth()
@@ -297,17 +308,17 @@ fun CategoryList(categories: Map<String, String>) {
         horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         items(categories.keys.toList()) { category ->
-            CategoryCard(category = category.toString(), imageUrl = categories[category])
+            CategoryCard(category = category, imageUrl = categories[category], navController = navController)
         }
     }
 }
 
 @Composable
-fun CategoryCard(category: String, imageUrl: String?) {
+fun CategoryCard(category: String, imageUrl: String?, navController: NavController) {
     Card(
         modifier = Modifier
-            .size(125.dp)
-            .clickable { /* Kategoriye tıklama işlevi */ },
+            .width(125.dp)
+            .height(125.dp),
         shape = RoundedCornerShape(16.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
         colors = CardDefaults.cardColors(containerColor = BackgroundColor)
@@ -319,18 +330,25 @@ fun CategoryCard(category: String, imageUrl: String?) {
             GlideImage(
                 imageModel = imageUrl,
                 contentDescription = "Food Image",
-                modifier = Modifier.size(150.dp, 100.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(100.dp)
+                    .clickable {
+                        navController.navigate("CategoryDetailScreen/$category")
+                    },
                 loading = { ShimmerEffect(modifier = Modifier.fillMaxSize()) }
             )
             Text(
                 text = category,
                 style = MaterialTheme.typography.bodySmall,
-                modifier = Modifier.padding(4.dp).align(Alignment.CenterHorizontally),
+                modifier = Modifier.padding(4.dp),
                 color = PrimaryTextColor
             )
         }
     }
 }
+
+
 
 @Composable
 fun SortAndFilterButtons() {
@@ -350,7 +368,7 @@ fun SortAndFilterButtons() {
             border = ButtonDefaults.outlinedButtonBorder
         ) {
             Icon(
-                imageVector = Icons.Default.Sort,
+                imageVector = Icons.AutoMirrored.Filled.Sort,
                 contentDescription = "Sırala Icon",
                 modifier = Modifier.padding(end = 4.dp),
                 tint = OnPrimaryTextColor

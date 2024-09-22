@@ -6,9 +6,11 @@ import androidx.lifecycle.ViewModel
 import com.cloffygames.foodfleet.data.entity.FirebaseCoupon
 import com.cloffygames.foodfleet.data.entity.FirebaseFood
 import com.cloffygames.foodfleet.data.entity.Food
+import com.cloffygames.foodfleet.data.entity.User
 import com.cloffygames.foodfleet.data.repo.FirebaseCouponRepository
 import com.cloffygames.foodfleet.data.repo.FirebaseFoodRepository
 import com.cloffygames.foodfleet.data.repo.FoodRepository
+import com.cloffygames.foodfleet.data.repo.UserRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -27,7 +29,8 @@ import javax.inject.Inject
 class HomeViewModel @Inject constructor(
     private val firebaseFoodRepository: FirebaseFoodRepository,
     private val frepo: FoodRepository,
-    private val firebaseCouponRepository: FirebaseCouponRepository
+    private val firebaseCouponRepository: FirebaseCouponRepository,
+    private val userRepo: UserRepository
 ) : ViewModel() {
 
     // Firebase'den çekilen yemek listesi LiveData olarak tutulur
@@ -56,4 +59,6 @@ class HomeViewModel @Inject constructor(
             foodList.value = frepo.getFoods()
         }
     }
+
+    fun getUser(onSuccess: (User) -> Unit, onFailure: (Exception) -> Unit) = userRepo.getUser(onSuccess, onFailure)
 }

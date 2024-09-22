@@ -12,11 +12,9 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Place
 import androidx.compose.material3.Button
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
-import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -32,9 +30,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.cloffygames.foodfleet.data.entity.User
+import com.cloffygames.foodfleet.ui.theme.BackgroundColor
 import com.cloffygames.foodfleet.uix.viewmodel.ProfileDetailViewModel
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProfileDetailScreen(viewModel: ProfileDetailViewModel, navController: NavController) {
     // Kullanıcı bilgileri için state'ler
@@ -45,15 +43,10 @@ fun ProfileDetailScreen(viewModel: ProfileDetailViewModel, navController: NavCon
 
     val context = LocalContext.current
 
-    // Arka plan rengi için soft tonlar
-    val backgroundColor = Color(0xFFF7F7F7)
-    val buttonColor = Color(0xFF6C63FF)
-    val textFieldColor = Color(0xFFFFFFFF)
-
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(backgroundColor)
+            .background(BackgroundColor)
             .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
@@ -72,10 +65,6 @@ fun ProfileDetailScreen(viewModel: ProfileDetailViewModel, navController: NavCon
             onValueChange = { userName = it },
             label = { Text("First Name") },
             leadingIcon = { Icon(Icons.Default.Person, contentDescription = null) },
-            colors = TextFieldDefaults.textFieldColors(
-                focusedIndicatorColor = Color.Transparent,
-                unfocusedIndicatorColor = Color.Transparent
-            ),
             shape = RoundedCornerShape(8.dp),
             modifier = Modifier
                 .fillMaxWidth()
@@ -88,10 +77,6 @@ fun ProfileDetailScreen(viewModel: ProfileDetailViewModel, navController: NavCon
             onValueChange = { userSurname = it },
             label = { Text("Last Name") },
             leadingIcon = { Icon(Icons.Default.Person, contentDescription = null) },
-            colors = TextFieldDefaults.textFieldColors(
-                focusedIndicatorColor = Color.Transparent,
-                unfocusedIndicatorColor = Color.Transparent
-            ),
             shape = RoundedCornerShape(8.dp),
             modifier = Modifier
                 .fillMaxWidth()
@@ -104,10 +89,6 @@ fun ProfileDetailScreen(viewModel: ProfileDetailViewModel, navController: NavCon
             onValueChange = { userId = it },
             label = { Text("User ID (e.g. @serhat123)") },
             leadingIcon = { Icon(Icons.Default.Person, contentDescription = null) },
-            colors = TextFieldDefaults.textFieldColors(
-                focusedIndicatorColor = Color.Transparent,
-                unfocusedIndicatorColor = Color.Transparent
-            ),
             shape = RoundedCornerShape(8.dp),
             modifier = Modifier
                 .fillMaxWidth()
@@ -120,10 +101,6 @@ fun ProfileDetailScreen(viewModel: ProfileDetailViewModel, navController: NavCon
             onValueChange = { userAddress = it },
             label = { Text("Address") },
             leadingIcon = { Icon(Icons.Default.Place, contentDescription = null) },
-            colors = TextFieldDefaults.textFieldColors(
-                focusedIndicatorColor = Color.Transparent,
-                unfocusedIndicatorColor = Color.Transparent
-            ),
             shape = RoundedCornerShape(8.dp),
             modifier = Modifier
                 .fillMaxWidth()

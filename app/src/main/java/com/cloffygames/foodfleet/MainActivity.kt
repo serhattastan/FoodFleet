@@ -8,6 +8,7 @@ import androidx.activity.viewModels
 import com.cloffygames.foodfleet.ui.theme.FoodFleetTheme
 import com.cloffygames.foodfleet.uix.view.Transitions
 import com.cloffygames.foodfleet.uix.viewmodel.AuthViewModel
+import com.cloffygames.foodfleet.uix.viewmodel.CategoryDetailScreenViewModel
 import com.cloffygames.foodfleet.uix.viewmodel.FoodDetailViewModel
 import com.cloffygames.foodfleet.uix.viewmodel.HomeViewModel
 import com.cloffygames.foodfleet.uix.viewmodel.ProfileDetailViewModel
@@ -21,13 +22,14 @@ class MainActivity : ComponentActivity() {
     val profileDetailViewModel : ProfileDetailViewModel by viewModels()
     val profileViewModel : ProfileViewModel by viewModels()
     val foodDetailViewModel : FoodDetailViewModel by viewModels()
+    val categoryDetailScreenViewModel : CategoryDetailScreenViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
             FoodFleetTheme {
-                Transitions(authViewModel, homeViewModel, profileDetailViewModel, profileViewModel, foodDetailViewModel)
+                Transitions(authViewModel, homeViewModel, profileDetailViewModel, profileViewModel, foodDetailViewModel, categoryDetailScreenViewModel)
             }
         }
     }
