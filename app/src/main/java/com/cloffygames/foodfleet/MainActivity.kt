@@ -14,6 +14,7 @@ import com.cloffygames.foodfleet.uix.viewmodel.FoodDetailViewModel
 import com.cloffygames.foodfleet.uix.viewmodel.HomeViewModel
 import com.cloffygames.foodfleet.uix.viewmodel.ProfileDetailViewModel
 import com.cloffygames.foodfleet.uix.viewmodel.ProfileViewModel
+import com.cloffygames.foodfleet.uix.viewmodel.SearchViewModel
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -25,13 +26,14 @@ class MainActivity : ComponentActivity() {
     val foodDetailViewModel : FoodDetailViewModel by viewModels()
     val categoryDetailScreenViewModel : CategoryDetailScreenViewModel by viewModels()
     val cartViewModel : CartViewModel by viewModels()
+    val searchViewModel : SearchViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
             FoodFleetTheme {
-                Transitions(authViewModel, homeViewModel, profileDetailViewModel, profileViewModel, foodDetailViewModel, categoryDetailScreenViewModel, cartViewModel)
+                Transitions(authViewModel, homeViewModel, profileDetailViewModel, profileViewModel, foodDetailViewModel, categoryDetailScreenViewModel, cartViewModel, searchViewModel)
             }
         }
     }

@@ -274,7 +274,7 @@ fun SearchBar(navController: NavController) {
             .fillMaxWidth()
             .padding(16.dp)
             .clickable {
-                //navController.navigate("search_screen")
+                navController.navigate("SearchScreen")
             },
         shape = RoundedCornerShape(24.dp),
         elevation = CardDefaults.elevatedCardElevation(defaultElevation = 8.dp),

@@ -14,6 +14,7 @@ import com.cloffygames.foodfleet.uix.viewmodel.FoodDetailViewModel
 import com.cloffygames.foodfleet.uix.viewmodel.HomeViewModel
 import com.cloffygames.foodfleet.uix.viewmodel.ProfileDetailViewModel
 import com.cloffygames.foodfleet.uix.viewmodel.ProfileViewModel
+import com.cloffygames.foodfleet.uix.viewmodel.SearchViewModel
 import com.google.gson.Gson
 
 @Composable
@@ -24,7 +25,8 @@ fun Transitions(
     profileViewModel: ProfileViewModel,
     foodDetailViewModel: FoodDetailViewModel,
     categoryDetailScreenViewModel: CategoryDetailScreenViewModel,
-    cartViewModel: CartViewModel
+    cartViewModel: CartViewModel,
+    searchViewModel: SearchViewModel
 ){
     val navController = rememberNavController()
     NavHost(navController = navController, startDestination = if (authViewModel.isUserLoggedIn()) "HomeScreen" else "AuthScreen"){
@@ -72,6 +74,9 @@ fun Transitions(
             ){
             val userName = it.arguments?.getString("userName")
             CartScreen(navController, cartViewModel, userName.toString())
+        }
+        composable("SearchScreen"){
+            SearchScreen(navController, searchViewModel)
         }
     }
 }
