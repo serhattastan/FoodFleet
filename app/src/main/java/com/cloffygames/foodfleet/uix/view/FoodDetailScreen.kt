@@ -1,6 +1,7 @@
 package com.cloffygames.foodfleet.uix.view
 
 import android.net.Uri
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -39,6 +40,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableIntStateOf
@@ -72,10 +74,21 @@ import com.skydoves.landscapist.glide.GlideImage
 @Composable
 fun FoodDetailScreen(food: Food, navController: NavController, viewModel: FoodDetailViewModel) {
     var quantity by remember { mutableIntStateOf(1) } // Miktar başlangıç değeri 1
-
     // Filtrelenen önerilen ürünler
     val recommendedFoods = viewModel.firebaseFoodList.observeAsState(emptyList()).value
         .filter { it.yemek_kategori in listOf("Meze", "İçecek", "Tatlı") }.shuffled()
+
+    var userAddress by remember { mutableStateOf("") }
+    var userName by remember { mutableStateOf("") }
+    LaunchedEffect(Unit) {
+        viewModel.getUser(
+            onSuccess = { user ->
+                userAddress = user.user_address
+                userName = user.user_id
+            },
+            onFailure = { Log.e("FoodDetailScreen", "Kullanıcı bilgileri alınamadı") }
+        )
+    }
 
     Scaffold(
         topBar = {
@@ -221,7 +234,7 @@ fun FoodDetailScreen(food: Food, navController: NavController, viewModel: FoodDe
                     color = PrimaryTextColor
                 )
                 Button(
-                    onClick = { /* Sepete ekle işlemi */ },
+                    onClick = { viewModel.addFoodToCart(food.yemek_adi, food.yemek_resim_adi, food.yemek_fiyat, quantity, userName) },
                     colors = ButtonDefaults.buttonColors(containerColor = PrimaryColor),
                     modifier = Modifier.padding(8.dp)
                 ) {
@@ -245,7 +258,7 @@ fun FoodDetailScreen(food: Food, navController: NavController, viewModel: FoodDe
                     .padding(8.dp),
             ) {
                 items(recommendedFoods) { recommendedFood ->
-                    RecommendedFoodCard(recommendedFood, navController)
+                    RecommendedFoodCard(recommendedFood, navController, viewModel, userName)
                 }
             }
 
@@ -256,7 +269,7 @@ fun FoodDetailScreen(food: Food, navController: NavController, viewModel: FoodDe
 
 // Yeni bir önerilen ürün kartı
 @Composable
-fun RecommendedFoodCard(food: FirebaseFood, navController: NavController) {
+fun RecommendedFoodCard(food: FirebaseFood, navController: NavController, viewModel: FoodDetailViewModel,userName: String) {
     Card(
         modifier = Modifier
             .size(200.dp, 166.dp)
@@ -310,7 +323,7 @@ fun RecommendedFoodCard(food: FirebaseFood, navController: NavController) {
                 }
 
                 IconButton(
-                    onClick = { /* Sepete ekle işlemi */ },
+                    onClick = {  },
                     modifier = Modifier.size(24.dp)
                 ) {
                     Icon(
@@ -321,7 +334,7 @@ fun RecommendedFoodCard(food: FirebaseFood, navController: NavController) {
                 }
 
                 IconButton(
-                    onClick = { /* Sepete ekle işlemi */ },
+                    onClick = { viewModel.addFoodToCart(food.yemek_adi, food.yemek_resim_adi, food.yemek_fiyat.toInt(), 1, userName) },
                     modifier = Modifier.size(24.dp)
                 ) {
                     Icon(
