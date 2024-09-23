@@ -90,17 +90,19 @@ fun HomeScreen(
     val firebaseCouponList by viewModel.firebaseCouponList.observeAsState(emptyList())
 
     var userAddress by remember { mutableStateOf("") }
+    var userName by remember { mutableStateOf("") }
     LaunchedEffect(Unit) {
         viewModel.getUser(
             onSuccess = { user ->
                 userAddress = user.user_address
+                userName = user.user_id
             },
             onFailure = { /* Hata işleme kodu */ }
         )
     }
 
     Scaffold(
-        topBar = { HomeTopAppBar(navController, userAddress) }
+        topBar = { HomeTopAppBar(navController, userAddress, userName) }
     ) { paddingValues ->
         LazyColumn(
             modifier = Modifier
@@ -133,7 +135,7 @@ fun HomeScreen(
 
             // Yana kaydırılabilir grid
             item {
-                FoodGrid(foodList = foodList, navController = navController)
+                FoodGrid(foodList = foodList, navController = navController, viewModel = viewModel, userName = userName)
             }
 
             item {
@@ -143,7 +145,7 @@ fun HomeScreen(
             // Kategorilere göre yemekleri listele
             items(firebaseCategoryList.keys.toList()) { category ->
                 val filteredFoodList = firebaseFoodList.filter { it.yemek_kategori == category }
-                CategoryFoodList(filteredFoodList, category, navController)
+                CategoryFoodList(filteredFoodList, category, navController, viewModel, userName)
             }
         }
     }
@@ -151,7 +153,7 @@ fun HomeScreen(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HomeTopAppBar(navController: NavController, userAddress: String) {
+fun HomeTopAppBar(navController: NavController, userAddress: String, userName: String) {
     TopAppBar(
         colors = (TopAppBarDefaults.topAppBarColors(containerColor = BackgroundColor)),
         title = {
@@ -184,7 +186,7 @@ fun HomeTopAppBar(navController: NavController, userAddress: String) {
                     tint = AddToCartButtonColor
                 )
             }
-            IconButton(onClick = { /* Canlı destek simgesi işlevi */ }) {
+            IconButton(onClick = { navController.navigate("CartScreen/$userName") }) {
                 Icon(
                     imageVector = Icons.Default.ShoppingCart,
                     contentDescription = "Sepet Icon",
@@ -400,7 +402,7 @@ fun SortAndFilterButtons() {
 }
 
 @Composable
-fun FoodGrid(foodList: List<Food>, navController: NavController) {
+fun FoodGrid(foodList: List<Food>, navController: NavController, viewModel: HomeViewModel, userName: String) {
     LazyRow(
         modifier = Modifier
             .fillMaxWidth()
@@ -412,7 +414,7 @@ fun FoodGrid(foodList: List<Food>, navController: NavController) {
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 rowItems.forEach { food ->
-                    FoodCard(food = food, navController = navController)
+                    FoodCard(food = food, navController = navController, viewModel, userName)
                 }
             }
         }
@@ -420,7 +422,7 @@ fun FoodGrid(foodList: List<Food>, navController: NavController) {
 }
 
 @Composable
-fun FoodCard(food: Food, navController: NavController) {
+fun FoodCard(food: Food, navController: NavController, viewModel: HomeViewModel, userName : String) {
     Card(
         modifier = Modifier
             .size(160.dp, 155.dp)
@@ -472,18 +474,18 @@ fun FoodCard(food: Food, navController: NavController) {
                 }
 
                 IconButton(
-                    onClick = { /* Sepete ekle işlemi */ },
+                    onClick = { /* Favorilere ekle işlemi */ },
                     modifier = Modifier.size(24.dp)
                 ) {
                     Icon(
                         imageVector = Icons.Default.FavoriteBorder,
-                        contentDescription = "Add to Cart",
+                        contentDescription = "Add to Favorite",
                         tint = AddToCartButtonColor
                     )
                 }
 
                 IconButton(
-                    onClick = { /* Sepete ekle işlemi */ },
+                    onClick = { viewModel.addFoodToCart(food.yemek_adi, "http://kasimadalan.pe.hu/yemekler/resimler/${food.yemek_resim_adi}", food.yemek_fiyat, 1, userName) },
                     modifier = Modifier.size(24.dp)
                 ) {
                     Icon(
@@ -498,7 +500,7 @@ fun FoodCard(food: Food, navController: NavController) {
 }
 
 @Composable
-fun FoodCardFirebase(food: FirebaseFood, navController: NavController) {
+fun FoodCardFirebase(food: FirebaseFood, navController: NavController, viewModel: HomeViewModel, userName : String) {
     Card(
         modifier = Modifier
             .size(225.dp, 155.dp)
@@ -562,7 +564,7 @@ fun FoodCardFirebase(food: FirebaseFood, navController: NavController) {
                 }
 
                 IconButton(
-                    onClick = { /* Sepete ekle işlemi */ },
+                    onClick = { viewModel.addFoodToCart(food.yemek_adi, food.yemek_resim_adi, food.yemek_fiyat.toInt(), 1, userName) },
                     modifier = Modifier.size(24.dp)
                 ) {
                     Icon(
@@ -577,7 +579,7 @@ fun FoodCardFirebase(food: FirebaseFood, navController: NavController) {
 }
 
 @Composable
-fun CategoryFoodList(filteredFoodList: List<FirebaseFood>, category: String, navController: NavController) {
+fun CategoryFoodList(filteredFoodList: List<FirebaseFood>, category: String, navController: NavController, viewModel: HomeViewModel, userName : String) {
     Column {
         Text(
             text = category,
@@ -592,7 +594,7 @@ fun CategoryFoodList(filteredFoodList: List<FirebaseFood>, category: String, nav
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             items(filteredFoodList) { food ->
-                FoodCardFirebase(food = food, navController = navController)
+                FoodCardFirebase(food = food, navController = navController, viewModel = viewModel, userName = userName)
             }
         }
     }

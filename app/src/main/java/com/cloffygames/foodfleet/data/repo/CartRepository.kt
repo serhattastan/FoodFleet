@@ -1,6 +1,7 @@
 package com.cloffygames.foodfleet.data.repo
 
 import com.cloffygames.foodfleet.data.datasource.CartDataSource
+import com.cloffygames.foodfleet.data.entity.Cart
 
 /**
  * CartRepository, sepetle ilgili işlemleri yönetir ve veri kaynağı (CartDataSource) ile iletişim kurar.
@@ -31,8 +32,8 @@ class CartRepository(private val cartDataSource: CartDataSource) {
     suspend fun addFoodToCart(
         yemek_adi: String,
         yemek_resim_adi: String,
-        yemek_fiyat: String,
-        yemek_siparis_adet: String,
+        yemek_fiyat: Int,
+        yemek_siparis_adet: Int,
         kullanici_adi: String
     ) = cartDataSource.addFoodToCart(yemek_adi, yemek_resim_adi, yemek_fiyat, yemek_siparis_adet, kullanici_adi)
 
@@ -44,4 +45,17 @@ class CartRepository(private val cartDataSource: CartDataSource) {
      * @return Yemek silme işleminin sonucunu içeren yanıt.
      */
     suspend fun deleteFoodFromCart(sepet_yemek_id: Int, kullanici_adi: String) = cartDataSource.deleteFoodFromCart(sepet_yemek_id, kullanici_adi)
+
+    suspend fun updateOrAddFoodToCart(
+        yemek_adi: String,
+        yemek_resim_adi: String,
+        yemek_fiyat: Int,
+        yemek_siparis_adet: Int,
+        kullanici_adi: String
+    ) = cartDataSource.updateOrAddFoodToCart(yemek_adi, yemek_resim_adi, yemek_fiyat, yemek_siparis_adet, kullanici_adi)
+
+    suspend fun increaseFoodQuantity(cartItem: Cart) = cartDataSource.increaseFoodQuantity(cartItem)
+
+    suspend fun decreaseFoodQuantity(cartItem: Cart) = cartDataSource.decreaseFoodQuantity(cartItem)
+
 }

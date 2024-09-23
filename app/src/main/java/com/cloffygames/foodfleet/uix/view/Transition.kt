@@ -8,6 +8,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.cloffygames.foodfleet.data.entity.Food
 import com.cloffygames.foodfleet.uix.viewmodel.AuthViewModel
+import com.cloffygames.foodfleet.uix.viewmodel.CartViewModel
 import com.cloffygames.foodfleet.uix.viewmodel.CategoryDetailScreenViewModel
 import com.cloffygames.foodfleet.uix.viewmodel.FoodDetailViewModel
 import com.cloffygames.foodfleet.uix.viewmodel.HomeViewModel
@@ -22,7 +23,8 @@ fun Transitions(
     profileDetailViewModel: ProfileDetailViewModel,
     profileViewModel: ProfileViewModel,
     foodDetailViewModel: FoodDetailViewModel,
-    categoryDetailScreenViewModel: CategoryDetailScreenViewModel
+    categoryDetailScreenViewModel: CategoryDetailScreenViewModel,
+    cartViewModel: CartViewModel
 ){
     val navController = rememberNavController()
     NavHost(navController = navController, startDestination = if (authViewModel.isUserLoggedIn()) "HomeScreen" else "AuthScreen"){
@@ -50,7 +52,6 @@ fun Transitions(
             val food = Gson().fromJson(json, Food::class.java)
             FoodDetailScreen(food, navController, foodDetailViewModel)
         }
-
         composable(
             "CategoryDetailScreen/{categoryName}",
             arguments = listOf(
@@ -62,8 +63,15 @@ fun Transitions(
             val categoryName = it.arguments?.getString("categoryName")
             CategoryDetailScreen(categoryName.toString(), navController, categoryDetailScreenViewModel)
         }
-
-
-
+        composable("CartScreen/{userName}",
+            arguments = listOf(
+                navArgument("userName"){
+                    type = NavType.StringType
+                }
+            )
+            ){
+            val userName = it.arguments?.getString("userName")
+            CartScreen(navController, cartViewModel, userName.toString())
+        }
     }
 }

@@ -1,5 +1,6 @@
 package com.cloffygames.foodfleet.data.datasource
 
+import android.util.Log
 import com.cloffygames.foodfleet.data.entity.Cart
 import com.cloffygames.foodfleet.retrofit.CartDao
 import kotlinx.coroutines.Dispatchers
@@ -21,8 +22,24 @@ class CartDataSource(private val cartDao: CartDao) {
      * @return Kullanıcının sepetindeki yemekleri içeren liste.
      */
     suspend fun getCartFoods(kullanici_adi: String): List<Cart> = withContext(Dispatchers.IO) {
-        return@withContext cartDao.getCartFoods(kullanici_adi).sepet_yemekler
+        try {
+            val response = cartDao.getCartFoods(kullanici_adi)
+            Log.e("API Yanıtı", response.toString()) // Gelen yanıtı logla
+
+            val cartFoods = response.sepet_yemekler ?: emptyList()
+
+            if (cartFoods.isEmpty()) {
+                Log.e("Sepet Bilgisi", "Sepet boş veya yemekler bulunamadı.")
+            }
+
+            return@withContext cartFoods
+        } catch (e: Exception) {
+            Log.e("Hata", "API'den veri çekilirken hata oluştu: ${e.message}")
+            return@withContext emptyList<Cart>()
+        }
     }
+
+
 
     /**
      * Kullanıcının sepetine yeni bir yemek ekler.
@@ -37,8 +54,8 @@ class CartDataSource(private val cartDao: CartDao) {
     suspend fun addFoodToCart(
         yemek_adi: String,
         yemek_resim_adi: String,
-        yemek_fiyat: String,
-        yemek_siparis_adet: String,
+        yemek_fiyat: Int,
+        yemek_siparis_adet: Int,
         kullanici_adi: String
     ) {
         cartDao.addFoodToCart(yemek_adi, yemek_resim_adi, yemek_fiyat, yemek_siparis_adet, kullanici_adi)
@@ -53,5 +70,92 @@ class CartDataSource(private val cartDao: CartDao) {
      */
     suspend fun deleteFoodFromCart(sepet_yemek_id: Int, kullanici_adi: String) {
         cartDao.deleteFoodFromCart(sepet_yemek_id, kullanici_adi)
+        Log.e("Yemek Silme Sonucu", cartDao.deleteFoodFromCart(sepet_yemek_id, kullanici_adi).message)
+    }
+
+    suspend fun updateOrAddFoodToCart(
+        yemek_adi: String,
+        yemek_resim_adi: String,
+        yemek_fiyat: Int,
+        yemek_siparis_adet: Int,
+        kullanici_adi: String
+    ) {
+        // Mevcut sepetteki yemekleri al
+        val currentCartFoods = getCartFoods(kullanici_adi)
+
+        // Aynı adı taşıyan yemek var mı kontrol et
+        val existingFood = currentCartFoods.find { it.yemek_adi == yemek_adi }
+
+        if (existingFood != null) {
+            // Eğer aynı yemek varsa, fiyat ve adet toplanarak güncellenir
+            val updated_fiyat = existingFood.yemek_fiyat + yemek_fiyat
+            val updated_adet = existingFood.yemek_siparis_adet + yemek_siparis_adet
+
+            // Eski yemek silinir
+            deleteFoodFromCart(existingFood.sepet_yemek_id, kullanici_adi)
+
+            // Güncellenmiş yemek tekrar sepete eklenir
+            cartDao.addFoodToCart(yemek_adi, yemek_resim_adi, updated_fiyat, updated_adet, kullanici_adi)
+        } else {
+            // Aynı yemek yoksa, direkt ekle
+            cartDao.addFoodToCart(yemek_adi, yemek_resim_adi, yemek_fiyat, yemek_siparis_adet, kullanici_adi)
+        }
+    }
+
+    suspend fun increaseFoodQuantity(cartItem: Cart) {
+        withContext(Dispatchers.IO) {
+            try {
+                // Sepetteki mevcut öğeyi sil
+                deleteFoodFromCart(cartItem.sepet_yemek_id, cartItem.kullanici_adi)
+
+                // Adeti artır
+                val updatedQuantity = cartItem.yemek_siparis_adet + 1
+                val updatedPrice: Int
+                if(cartItem.yemek_siparis_adet > 1){
+                    updatedPrice = (cartItem.yemek_fiyat / cartItem.yemek_siparis_adet) * updatedQuantity
+                    Log.e("Fiyat", updatedPrice.toString())
+                }else{
+                    updatedPrice = cartItem.yemek_fiyat * updatedQuantity
+                }
+
+
+                // Yeni adet ile tekrar ekle
+                cartDao.addFoodToCart(
+                    yemek_adi = cartItem.yemek_adi,
+                    yemek_resim_adi = cartItem.yemek_resim_adi,
+                    yemek_fiyat = updatedPrice,
+                    yemek_siparis_adet = updatedQuantity,
+                    kullanici_adi = cartItem.kullanici_adi
+                )
+            } catch (e: Exception) {
+                Log.e("Hata", "Yemek artırma işleminde hata: ${e.message}")
+            }
+        }
+    }
+
+    suspend fun decreaseFoodQuantity(cartItem: Cart) {
+        withContext(Dispatchers.IO) {
+            if (cartItem.yemek_siparis_adet > 1) {
+                try {
+                    // Sepetteki mevcut öğeyi sil
+                    deleteFoodFromCart(cartItem.sepet_yemek_id, cartItem.kullanici_adi)
+
+                    // Adeti azalt
+                    val updatedQuantity = cartItem.yemek_siparis_adet - 1
+                    val updatedPrice = (cartItem.yemek_fiyat / cartItem.yemek_siparis_adet) * updatedQuantity
+
+                    // Yeni adet ile tekrar ekle
+                    cartDao.addFoodToCart(
+                        yemek_adi = cartItem.yemek_adi,
+                        yemek_resim_adi = cartItem.yemek_resim_adi,
+                        yemek_fiyat = updatedPrice,
+                        yemek_siparis_adet = updatedQuantity,
+                        kullanici_adi = cartItem.kullanici_adi
+                    )
+                } catch (e: Exception) {
+                    Log.e("Hata", "Yemek azaltma işleminde hata: ${e.message}")
+                }
+            }
+        }
     }
 }

@@ -7,6 +7,7 @@ import com.cloffygames.foodfleet.data.entity.FirebaseCoupon
 import com.cloffygames.foodfleet.data.entity.FirebaseFood
 import com.cloffygames.foodfleet.data.entity.Food
 import com.cloffygames.foodfleet.data.entity.User
+import com.cloffygames.foodfleet.data.repo.CartRepository
 import com.cloffygames.foodfleet.data.repo.FirebaseCouponRepository
 import com.cloffygames.foodfleet.data.repo.FirebaseFoodRepository
 import com.cloffygames.foodfleet.data.repo.FoodRepository
@@ -30,7 +31,8 @@ class HomeViewModel @Inject constructor(
     private val firebaseFoodRepository: FirebaseFoodRepository,
     private val frepo: FoodRepository,
     private val firebaseCouponRepository: FirebaseCouponRepository,
-    private val userRepo: UserRepository
+    private val userRepo: UserRepository,
+    private val cartRepository: CartRepository
 ) : ViewModel() {
 
     // Firebase'den çekilen yemek listesi LiveData olarak tutulur
@@ -61,4 +63,22 @@ class HomeViewModel @Inject constructor(
     }
 
     fun getUser(onSuccess: (User) -> Unit, onFailure: (Exception) -> Unit) = userRepo.getUser(onSuccess, onFailure)
+
+    private fun getCardFoods(kullanici_adi: String) {
+        CoroutineScope(Dispatchers.Main).launch {
+            cartRepository.getCartFoods(kullanici_adi)
+        }
+    }
+
+    fun addFoodToCart(yemek_adi: String, yemek_resim_adi: String, yemek_fiyat: Int, yemek_siparis_adet: Int, kullanici_adi: String){
+        CoroutineScope(Dispatchers.Main).launch {
+            cartRepository.updateOrAddFoodToCart(yemek_adi, yemek_resim_adi, yemek_fiyat, yemek_siparis_adet, kullanici_adi)
+        }
+    }
+
+    fun deleteFoodFromCart(sepet_yemek_id: Int, kullanici_adi: String){
+        CoroutineScope(Dispatchers.Main).launch {
+            cartRepository.deleteFoodFromCart(sepet_yemek_id, kullanici_adi)
+        }
+    }
 }
