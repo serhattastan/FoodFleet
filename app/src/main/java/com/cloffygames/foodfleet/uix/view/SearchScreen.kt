@@ -109,22 +109,6 @@ fun SearchScreen(navController: NavController, viewModel: SearchViewModel) {
                             tint = PrimaryTextColor
                         )
                     }
-                },
-                actions = {
-                    IconButton(onClick = { /* Profil simgesi işlevi */ }) {
-                        Icon(
-                            imageVector = Icons.Default.FavoriteBorder,
-                            contentDescription = "Favoriler",
-                            tint = AddToCartButtonColor
-                        )
-                    }
-                    IconButton(onClick = { navController.navigate("CartScreen") }) {
-                        Icon(
-                            imageVector = Icons.Default.ShoppingCart,
-                            contentDescription = "Sepet",
-                            tint = AddToCartButtonColor
-                        )
-                    }
                 }
             )
         },
