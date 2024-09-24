@@ -50,13 +50,13 @@ import com.cloffygames.foodfleet.uix.viewmodel.AuthViewModel
  */
 @Composable
 fun RegisterScreen(onLoginClick: () -> Unit, authViewModel: AuthViewModel, navController: NavController) {
-    // State değişkenlerini tanımlıyoruz
+    // E-posta, parola ve diğer kullanıcı girdileri için state değişkenleri tanımlanıyor.
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var confirmPassword by remember { mutableStateOf("") }
     var errorMessage by remember { mutableStateOf("") }
-    var passwordVisible by remember { mutableStateOf(false) } // Şifre görünürlüğünü kontrol eden state
-    var confirmPasswordVisible by remember { mutableStateOf(false) } // Şifre onayının görünürlüğünü kontrol eden state
+    var passwordVisible by remember { mutableStateOf(false) } // Şifre görünürlüğünü kontrol eder
+    var confirmPasswordVisible by remember { mutableStateOf(false) } // Şifre onayı görünürlüğünü kontrol eder
     var isEmailValid by remember { mutableStateOf(true) }  // E-posta doğrulama state
     var isPasswordValid by remember { mutableStateOf(true) }  // Şifre doğrulama state
     var isConfirmPasswordValid by remember { mutableStateOf(true) }  // Şifre eşleşme doğrulama state
@@ -64,60 +64,62 @@ fun RegisterScreen(onLoginClick: () -> Unit, authViewModel: AuthViewModel, navCo
     var isPasswordEmpty by remember { mutableStateOf(false) } // Şifre alanı boş mu?
     var isConfirmPasswordEmpty by remember { mutableStateOf(false) } // Şifre onayı boş mu?
 
-    // Lottie animasyonunu yüklemek ve ilerlemesini kontrol etmek için kompozisyonu oluşturur
+    // Lottie animasyonunu yükleyip ilerleme durumunu kontrol ediyoruz.
     val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(R.raw.register_anim))
     val progress by animateLottieCompositionAsState(composition, iterations = LottieConstants.IterateForever)
 
-
+    // UI bileşenlerini dikey bir düzen ile sıralayan bir sütun oluşturuyoruz.
     Column(
         modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
+            .fillMaxSize() // Tüm ekranı doldurur
+            .padding(16.dp), // Ekranın kenarlarından 16dp boşluk bırakır
+        horizontalAlignment = Alignment.CenterHorizontally, // Yatayda ortalar
+        verticalArrangement = Arrangement.Center // Dikeyde ortalar
     ) {
         // Lottie animasyon bileşeni
         LottieAnimation(
             composition = composition,
             progress = progress,
-            modifier = Modifier.size(200.dp, 200.dp)
+            modifier = Modifier.size(200.dp, 200.dp) // Animasyonun boyutlarını belirler
         )
 
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.height(24.dp)) // 24dp boşluk
 
-        // Kayıt başlığı
+        // Kayıt ekranı başlığı
         Text(
             text = "Create an Account",
             style = MaterialTheme.typography.headlineSmall.copy(
-                fontWeight = FontWeight.Bold,
+                fontWeight = FontWeight.Bold, // Başlık metninin kalınlığı
                 fontSize = 24.sp
             ),
-            color = MaterialTheme.colorScheme.primary
+            color = MaterialTheme.colorScheme.primary // Ana renk
         )
 
-        Spacer(modifier = Modifier.height(12.dp))
+        Spacer(modifier = Modifier.height(12.dp)) // 12dp boşluk
 
         // E-posta giriş alanı
         OutlinedTextField(
             value = email,
             onValueChange = {
                 email = it
-                isEmailEmpty = email.isEmpty()
-                isEmailValid = android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()
+                isEmailEmpty = email.isEmpty() // E-posta alanının boş olup olmadığını kontrol eder
+                isEmailValid = android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches() // E-posta formatını kontrol eder
             },
             label = { Text("Email") },
-            isError = !isEmailValid || isEmailEmpty,
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
+            isError = !isEmailValid || isEmailEmpty, // E-posta doğrulama ve boşluk kontrolü
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email), // E-posta için uygun klavye tipi
             modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(12.dp)
+            shape = RoundedCornerShape(12.dp) // Köşeleri yuvarlatır
         )
         if (isEmailEmpty) {
+            // E-posta boş olduğunda gösterilen hata mesajı
             Text(
                 text = "Email cannot be empty",
                 color = Color.Red,
                 fontSize = 12.sp
             )
         } else if (!isEmailValid) {
+            // Geçersiz e-posta formatı için gösterilen hata mesajı
             Text(
                 text = "Invalid email format",
                 color = Color.Red,
@@ -125,22 +127,23 @@ fun RegisterScreen(onLoginClick: () -> Unit, authViewModel: AuthViewModel, navCo
             )
         }
 
-        Spacer(modifier = Modifier.height(12.dp))
+        Spacer(modifier = Modifier.height(12.dp)) // 12dp boşluk
 
         // Parola giriş alanı
         OutlinedTextField(
             value = password,
             onValueChange = {
                 password = it
-                isPasswordEmpty = password.isEmpty()
-                isPasswordValid = password.length >= 6
+                isPasswordEmpty = password.isEmpty() // Parola boş mu?
+                isPasswordValid = password.length >= 6 // Şifrenin minimum uzunluk kontrolü
             },
             label = { Text("Password") },
-            isError = !isPasswordValid || isPasswordEmpty,
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-            visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+            isError = !isPasswordValid || isPasswordEmpty, // Parola doğrulama ve boşluk kontrolü
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password), // Parola için uygun klavye tipi
+            visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(), // Şifrenin görünürlüğünü kontrol eder
             modifier = Modifier.fillMaxWidth(),
             trailingIcon = {
+                // Şifreyi gizle/göster ikonu
                 val image = if (passwordVisible)
                     painterResource(id = R.drawable.icon_visibility_on)
                 else
@@ -157,12 +160,14 @@ fun RegisterScreen(onLoginClick: () -> Unit, authViewModel: AuthViewModel, navCo
             shape = RoundedCornerShape(12.dp)
         )
         if (isPasswordEmpty) {
+            // Parola boş olduğunda gösterilen hata mesajı
             Text(
                 text = "Password cannot be empty",
                 color = Color.Red,
                 fontSize = 12.sp
             )
         } else if (!isPasswordValid) {
+            // Geçersiz parola için gösterilen hata mesajı
             Text(
                 text = "Password must be at least 6 characters",
                 color = Color.Red,
@@ -170,22 +175,23 @@ fun RegisterScreen(onLoginClick: () -> Unit, authViewModel: AuthViewModel, navCo
             )
         }
 
-        Spacer(modifier = Modifier.height(12.dp))
+        Spacer(modifier = Modifier.height(12.dp)) // 12dp boşluk
 
         // Parola onay giriş alanı
         OutlinedTextField(
             value = confirmPassword,
             onValueChange = {
                 confirmPassword = it
-                isConfirmPasswordEmpty = confirmPassword.isEmpty()
-                isConfirmPasswordValid = password == confirmPassword
+                isConfirmPasswordEmpty = confirmPassword.isEmpty() // Şifre onayı boş mu?
+                isConfirmPasswordValid = password == confirmPassword // Şifreler eşleşiyor mu?
             },
             label = { Text("Confirm Password") },
-            isError = !isConfirmPasswordValid || isConfirmPasswordEmpty,
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-            visualTransformation = if (confirmPasswordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+            isError = !isConfirmPasswordValid || isConfirmPasswordEmpty, // Şifre eşleşme doğrulaması ve boşluk kontrolü
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password), // Parola onayı için uygun klavye tipi
+            visualTransformation = if (confirmPasswordVisible) VisualTransformation.None else PasswordVisualTransformation(), // Şifre onayının görünürlüğünü kontrol eder
             modifier = Modifier.fillMaxWidth(),
             trailingIcon = {
+                // Şifre onayını gizle/göster ikonu
                 val image = if (confirmPasswordVisible)
                     painterResource(id = R.drawable.icon_visibility_on)
                 else
@@ -202,12 +208,14 @@ fun RegisterScreen(onLoginClick: () -> Unit, authViewModel: AuthViewModel, navCo
             shape = RoundedCornerShape(12.dp)
         )
         if (isConfirmPasswordEmpty) {
+            // Şifre onayı boş olduğunda gösterilen hata mesajı
             Text(
                 text = "Confirm Password cannot be empty",
                 color = Color.Red,
                 fontSize = 12.sp
             )
         } else if (!isConfirmPasswordValid) {
+            // Şifreler eşleşmediğinde gösterilen hata mesajı
             Text(
                 text = "Passwords do not match",
                 color = Color.Red,
@@ -215,61 +223,60 @@ fun RegisterScreen(onLoginClick: () -> Unit, authViewModel: AuthViewModel, navCo
             )
         }
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(16.dp)) // 16dp boşluk
 
         // Kayıt butonu
         Button(
             onClick = {
-                // Alanların boş olup olmadığını kontrol ediyoruz
+                // Kayıt işlemi öncesi alanların boş olup olmadığını kontrol ederiz.
                 isEmailEmpty = email.isEmpty()
                 isPasswordEmpty = password.isEmpty()
                 isConfirmPasswordEmpty = confirmPassword.isEmpty()
 
+                // Eğer tüm alanlar doğruysa kayıt işlemi yapılır
                 if (!isEmailEmpty && !isPasswordEmpty && !isConfirmPasswordEmpty && isEmailValid && isPasswordValid && isConfirmPasswordValid) {
                     authViewModel.register(email, password) { success, error ->
                         if (success) {
-                            // Kayıt başarılı olduğunda HomeScreen'e yönlendirme
+                            // Kayıt başarılı olduğunda ProfileDetailScreen'e yönlendirilir
                             navController.navigate("ProfileDetailScreen") {
-                                popUpTo("AuthScreen") { inclusive = true }  // LoginScreen'i yığından çıkar
-                                launchSingleTop = true  // Aynı ekranı üst üste açmayı engelle
+                                popUpTo("AuthScreen") { inclusive = true }  // AuthScreen'i geri dönüş yığından çıkarır
+                                launchSingleTop = true  // Aynı ekranın üst üste açılmasını engeller
                             }
                         } else {
-                            errorMessage = error ?: "Unknown error"
+                            errorMessage = error ?: "Unknown error" // Kayıt hatası mesajı
                         }
                     }
                 } else {
+                    // Eğer alanlar hatalıysa hata mesajı gösterilir
                     errorMessage = "Please fill in all fields correctly."
                 }
             },
             modifier = Modifier
-                .fillMaxWidth()
-                .height(45.dp),
-            shape = RoundedCornerShape(12.dp),
+                .fillMaxWidth() // Buton genişliği
+                .height(45.dp), // Buton yüksekliği
+            shape = RoundedCornerShape(12.dp), // Köşeleri yuvarlatır
             colors = ButtonDefaults.buttonColors(
-                containerColor = MaterialTheme.colorScheme.primary
+                containerColor = MaterialTheme.colorScheme.primary // Buton rengi
             )
         ) {
-            Text(text = "Sign Up", fontSize = 16.sp, fontWeight = FontWeight.Bold)
+            Text(text = "Sign Up", fontSize = 16.sp, fontWeight = FontWeight.Bold) // Buton metni
         }
-
 
         if (errorMessage.isNotEmpty()) {
-            Spacer(modifier = Modifier.height(12.dp))
-            Text(text = errorMessage, color = Color.Red)
+            // Hata mesajı gösterimi
+            Spacer(modifier = Modifier.height(12.dp)) // 12dp boşluk
+            Text(text = errorMessage, color = Color.Red) // Kırmızı renkli hata mesajı
         }
 
-        Spacer(modifier = Modifier.height(12.dp))
+        Spacer(modifier = Modifier.height(12.dp)) // 12dp boşluk
 
         // Giriş ekranına yönlendirme linki
         Text(
             text = "Already have an account? Sign in",
-            modifier = Modifier.clickable { onLoginClick() },
-            color = MaterialTheme.colorScheme.primary,
+            modifier = Modifier.clickable { onLoginClick() }, // Giriş ekranına yönlendirir
+            color = MaterialTheme.colorScheme.primary, // Linkin rengi
             fontSize = 14.sp,
-            fontWeight = FontWeight.Medium
+            fontWeight = FontWeight.Medium // Metin stili
         )
     }
 }
-
-
-

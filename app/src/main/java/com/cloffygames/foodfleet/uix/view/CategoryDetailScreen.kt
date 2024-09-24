@@ -16,7 +16,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material3.Card
@@ -30,7 +30,12 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
@@ -49,6 +54,14 @@ import com.cloffygames.foodfleet.uix.viewmodel.CategoryDetailScreenViewModel
 import com.google.gson.Gson
 import com.skydoves.landscapist.glide.GlideImage
 
+/**
+ * CategoryDetailScreen bileşeni, belirli bir kategorideki yiyeceklerin listesini gösterir.
+ * Kullanıcı bir yiyeceğe tıklayarak detaylarını görüntüleyebilir.
+ *
+ * @param category Kategori ismi
+ * @param navController Ekranlar arası geçişi yönetmek için kullanılan NavController
+ * @param viewModel Kategoriye ait yiyeceklerin verilerini yöneten ViewModel
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CategoryDetailScreen(
@@ -60,13 +73,27 @@ fun CategoryDetailScreen(
     val foodList = viewModel.firebaseFoodList.observeAsState(emptyList()).value
         .filter { it.yemek_kategori == category }
 
+    // Kullanıcı bilgilerini almak için state tanımları
+    var userName by remember { mutableStateOf("") }
+
+    // Kullanıcı verilerini almak için LaunchedEffect kullanılıyor
+    LaunchedEffect(Unit) {
+        viewModel.getUser(
+            onSuccess = { user ->
+                userName = user.user_id
+            },
+            onFailure = { /* Hata işleme kodu */ }
+        )
+    }
+
+    // Scaffold bileşeni, üst bar ve içerik alanını düzenler
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(text = category, color = PrimaryTextColor) },
+                title = { Text(text = category, color = PrimaryTextColor) }, // Üst bar başlığı kategori ismi
                 navigationIcon = {
                     IconButton(onClick = { navController.popBackStack() }) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Back", tint = PrimaryTextColor)
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = PrimaryTextColor)
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = BackgroundColor)
@@ -74,6 +101,7 @@ fun CategoryDetailScreen(
         }
     ) { paddingValues ->
         if (foodList.isNotEmpty()) {
+            // Yiyecekleri listeleyen bir LazyColumn
             LazyColumn(
                 modifier = Modifier
                     .padding(paddingValues)
@@ -82,11 +110,12 @@ fun CategoryDetailScreen(
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 items(foodList) { food ->
-                    CategoryDetailCard(food, navController)
+                    // Her bir yiyecek için CategoryDetailCard bileşeni
+                    CategoryDetailCard(food, navController, userName, viewModel)
                 }
             }
         } else {
-            // Boş bir durum ekranı göster
+            // Eğer listede yiyecek yoksa gösterilecek boş durum mesajı
             Box(
                 contentAlignment = Alignment.Center,
                 modifier = Modifier
@@ -104,8 +133,17 @@ fun CategoryDetailScreen(
     }
 }
 
+/**
+ * CategoryDetailCard bileşeni, bir yiyecek kartını kategorilerde listelemeye uygun olarak gösterir.
+ *
+ * @param food Gösterilecek yiyecek bilgisi
+ * @param navController Ekranlar arası geçişi yönetmek için kullanılan NavController
+ * @param userName Kullanıcı ismi
+ * @param viewModel Kategori ekranı işlemlerini yöneten ViewModel
+ */
 @Composable
-fun CategoryDetailCard(food: FirebaseFood, navController: NavController) {
+fun CategoryDetailCard(food: FirebaseFood, navController: NavController, userName: String, viewModel: CategoryDetailScreenViewModel) {
+    // Her bir yiyeceği kart olarak gösterir
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -113,31 +151,34 @@ fun CategoryDetailCard(food: FirebaseFood, navController: NavController) {
             .padding(horizontal = 8.dp, vertical = 16.dp)
             .shadow(elevation = 4.dp)
             .clickable {
+                // Yiyecek detayına geçiş yaparken yiyecek bilgisini JSON formatında gönderir
                 val transitionFood = Food(food.yemek_id, food.yemek_adi, food.yemek_resim_adi, food.yemek_fiyat.toInt())
                 val json = Uri.encode(Gson().toJson(transitionFood))
                 navController.navigate("FoodDetailScreen/${json}")
             },
-        shape = RoundedCornerShape(16.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
-        colors = CardDefaults.cardColors(containerColor = BackgroundColor)
+        shape = RoundedCornerShape(16.dp), // Kartın köşelerini yuvarlatır
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp), // Kartın gölgesi
+        colors = CardDefaults.cardColors(containerColor = BackgroundColor) // Kartın arka plan rengi
     ) {
         Column(
             modifier = Modifier.fillMaxSize(),
             verticalArrangement = Arrangement.SpaceBetween
         ) {
+            // Yiyecek Resmi
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(140.dp)
             ) {
                 GlideImage(
-                    imageModel = food.yemek_resim_adi,
-                    contentDescription = food.yemek_adi,
+                    imageModel = food.yemek_resim_adi, // Firebase'den alınan yiyecek resmi URL'si
+                    contentDescription = food.yemek_adi, // Yiyecek açıklaması
                     modifier = Modifier.fillMaxSize(),
-                    loading = { ShimmerEffect(modifier = Modifier.fillMaxSize()) }
+                    loading = { ShimmerEffect(modifier = Modifier.fillMaxSize()) } // Resim yüklenirken shimmer efekti
                 )
             }
 
+            // Yiyecek Adı ve Fiyatı
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -160,19 +201,24 @@ fun CategoryDetailCard(food: FirebaseFood, navController: NavController) {
                     )
                 }
 
+                // Favorilere ekle butonu
                 IconButton(
-                    onClick = { /* Sepete ekle işlemi */ },
+                    onClick = { /* Favorilere ekle işlemi */ },
                     modifier = Modifier.size(24.dp)
                 ) {
                     Icon(
                         imageVector = Icons.Default.FavoriteBorder,
-                        contentDescription = "Add to Cart",
+                        contentDescription = "Add to Favorite",
                         tint = AddToCartButtonColor
                     )
                 }
 
+                // Sepete ekle butonu
                 IconButton(
-                    onClick = { /* Sepete ekle işlemi */ },
+                    onClick = {
+                        // Kullanıcının seçtiği yemeği sepete ekle
+                        viewModel.addFoodToCart(food.yemek_adi, food.yemek_resim_adi, food.yemek_fiyat.toInt(), 1, userName)
+                    },
                     modifier = Modifier.size(24.dp)
                 ) {
                     Icon(

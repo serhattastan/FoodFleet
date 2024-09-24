@@ -34,21 +34,28 @@ import com.cloffygames.foodfleet.uix.uicomponent.ShimmerEffect
 import com.cloffygames.foodfleet.uix.viewmodel.CartViewModel
 import com.skydoves.landscapist.glide.GlideImage
 
+/**
+ * CartScreen bileşeni, kullanıcı sepetinde bulunan yiyeceklerin listesini gösterir.
+ * Sepete eklenen yiyeceklerin miktarı ayarlanabilir ve kupon kodları uygulanabilir.
+ *
+ * @param navController Ekranlar arasında geçişi sağlayan NavController
+ * @param viewModel Sepet işlemlerini yöneten ViewModel
+ * @param userName Kullanıcı ismi
+ */
 @Composable
 fun CartScreen(navController: NavController, viewModel: CartViewModel, userName: String) {
     val cartFoodList by viewModel.cartFoods.observeAsState(emptyList())
     val firebaseCouponList by viewModel.firebaseCouponList.observeAsState(emptyList())
     val sortedCartFoodList = cartFoodList.sortedBy { it.yemek_adi }
 
-    // State to hold the entered coupon code
-    var couponCode by remember { mutableStateOf("") }
-    // State to hold the applied coupon
-    var appliedCoupon by remember { mutableStateOf<FirebaseCoupon?>(null) }
+    var couponCode by remember { mutableStateOf("") } // Kupon kodu state
+    var appliedCoupon by remember { mutableStateOf<FirebaseCoupon?>(null) } // Uygulanan kupon state
 
     LaunchedEffect(key1 = true) {
         viewModel.getCartFoods(userName)
     }
 
+    // Scaffold ile sepet ekranı düzenleniyor
     Scaffold(
         topBar = {
             CartTopAppBar(navController, "Sepetim")
@@ -62,6 +69,7 @@ fun CartScreen(navController: NavController, viewModel: CartViewModel, userName:
                     .padding(16.dp)
             ) {
                 if (sortedCartFoodList.isNotEmpty()) {
+                    // Sepetteki yiyeceklerin listesi
                     LazyColumn(
                         modifier = Modifier
                             .weight(1f)
@@ -73,31 +81,27 @@ fun CartScreen(navController: NavController, viewModel: CartViewModel, userName:
 
                     Spacer(modifier = Modifier.height(16.dp))
 
-                    // Coupon Code Input
+                    // Kupon Kodu Girişi
                     CouponCodeInput(
                         couponCode = couponCode,
                         onCouponCodeChange = { couponCode = it },
                         onApplyCoupon = {
                             val coupon = firebaseCouponList.find { it.coupon_code == couponCode }
-                            if (coupon != null) {
-                                appliedCoupon = coupon
-                            } else {
-                                appliedCoupon = null // No valid coupon found
-                            }
+                            appliedCoupon = coupon
                         },
                         appliedCoupon = appliedCoupon
                     )
 
                     Spacer(modifier = Modifier.height(16.dp))
 
-                    // Total Price
+                    // Toplam Fiyat Bölümü
                     TotalPriceSection(cartFoodList = sortedCartFoodList, appliedCoupon = appliedCoupon)
 
                     Spacer(modifier = Modifier.height(16.dp))
 
-                    // Confirm Cart Button
+                    // Sepeti Onayla Butonu
                     ConfirmCartButton {
-                        // Confirm Cart Action
+                        // Sepet Onaylama İşlemi
                     }
                 } else {
                     EmptyCartMessage()
@@ -107,6 +111,14 @@ fun CartScreen(navController: NavController, viewModel: CartViewModel, userName:
     )
 }
 
+/**
+ * Kupon kodu giriş alanı. Kullanıcı kupon kodunu girip uygulayabilir.
+ *
+ * @param couponCode Kupon kodu
+ * @param onCouponCodeChange Kupon kodu değişikliklerini yöneten fonksiyon
+ * @param onApplyCoupon Kupon uygulama işlemini başlatan fonksiyon
+ * @param appliedCoupon Uygulanan kupon bilgisi
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CouponCodeInput(
@@ -149,7 +161,12 @@ fun CouponCodeInput(
     }
 }
 
-
+/**
+ * CartTopAppBar, sepet ekranının üst barını oluşturur.
+ *
+ * @param navController Navigasyon kontrolcüsü
+ * @param title Üst bar başlığı
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CartTopAppBar(navController: NavController, title: String) {
@@ -165,6 +182,13 @@ fun CartTopAppBar(navController: NavController, title: String) {
     )
 }
 
+/**
+ * CartItemCard bileşeni, sepetteki her yiyeceği kart biçiminde gösterir.
+ *
+ * @param cartItem Sepetteki yiyecek bilgisi
+ * @param viewModel Sepet işlemlerini yöneten ViewModel
+ * @param userName Kullanıcı ismi
+ */
 @Composable
 fun CartItemCard(cartItem: Cart, viewModel: CartViewModel, userName: String) {
     Card(
@@ -279,16 +303,18 @@ fun CartItemCard(cartItem: Cart, viewModel: CartViewModel, userName: String) {
     }
 }
 
-
-
-
-
+/**
+ * Toplam fiyat bölümü. Uygulanan kupon varsa indirim hesaplanır.
+ *
+ * @param cartFoodList Sepetteki yiyeceklerin listesi
+ * @param appliedCoupon Uygulanan kupon (varsa)
+ */
 @Composable
 fun TotalPriceSection(cartFoodList: List<Cart>, appliedCoupon: FirebaseCoupon?) {
     val totalPrice = cartFoodList.sumOf { it.yemek_fiyat }
     val discount = appliedCoupon?.coupon_discount ?: 0.0
     var finalPrice = totalPrice - discount
-    if(finalPrice < 0) {
+    if (finalPrice < 0) {
         finalPrice = 0.0
     }
 
@@ -303,6 +329,11 @@ fun TotalPriceSection(cartFoodList: List<Cart>, appliedCoupon: FirebaseCoupon?) 
     }
 }
 
+/**
+ * Sepeti onaylama butonu.
+ *
+ * @param onConfirm Sepeti onaylama işlemini başlatan fonksiyon
+ */
 @Composable
 fun ConfirmCartButton(onConfirm: () -> Unit) {
     Button(
@@ -316,6 +347,9 @@ fun ConfirmCartButton(onConfirm: () -> Unit) {
     }
 }
 
+/**
+ * Boş sepet mesajı. Eğer kullanıcı sepeti boş ise bu mesaj görüntülenir.
+ */
 @Composable
 fun EmptyCartMessage() {
     Text(

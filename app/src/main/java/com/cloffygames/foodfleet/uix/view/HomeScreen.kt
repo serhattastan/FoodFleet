@@ -58,7 +58,6 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.cloffygames.foodfleet.data.entity.FirebaseCoupon
@@ -78,19 +77,29 @@ import com.cloffygames.foodfleet.uix.viewmodel.HomeViewModel
 import com.google.gson.Gson
 import com.skydoves.landscapist.glide.GlideImage
 
+/**
+ * HomeScreen bileşeni, ana sayfa ekranının oluşturulmasını sağlar. Bu ekran,
+ * kullanıcıya kategori, yiyecek ve kuponların gösterilmesini içerir.
+ *
+ * @param viewModel Ana ekranın ViewModel'i
+ * @param navController Uygulama içinde diğer ekranlara geçişi sağlayan NavController
+ */
 @Composable
 fun HomeScreen(
     viewModel: HomeViewModel,
     navController: NavController
 ) {
-    // ViewModel'den verileri gözlemleyin
+    // ViewModel'deki veriler izleniyor
     val firebaseFoodList by viewModel.firebaseFoodList.observeAsState(emptyList())
     val firebaseCategoryList by viewModel.firebaseCategoryList.observeAsState(emptyMap())
     val foodList by viewModel.foodList.observeAsState(emptyList())
     val firebaseCouponList by viewModel.firebaseCouponList.observeAsState(emptyList())
 
+    // Kullanıcı bilgilerini almak için state tanımları
     var userAddress by remember { mutableStateOf("") }
     var userName by remember { mutableStateOf("") }
+
+    // Kullanıcı verilerini almak için LaunchedEffect kullanılıyor
     LaunchedEffect(Unit) {
         viewModel.getUser(
             onSuccess = { user ->
@@ -101,6 +110,7 @@ fun HomeScreen(
         )
     }
 
+    // Scaffold, üstte AppBar ve içerik alanını düzenler
     Scaffold(
         topBar = { HomeTopAppBar(navController, userAddress, userName) }
     ) { paddingValues ->
@@ -110,39 +120,34 @@ fun HomeScreen(
                 .fillMaxSize()
                 .background(BackgroundColor)
         ) {
-            // SearchBar görünümü
+            // Search bar öğesi
             item {
                 SearchBar(navController = navController)
-                VerticalDivider()
+                VerticalDivider() // Dikey ayraç
                 Spacer(modifier = Modifier.height(16.dp))
             }
-            // Pager ile kuponları gösterme
+
+            // Kuponların gösterilmesi için bir pager
             item {
                 CouponPager(firebaseCouponList)
             }
 
-
-
-            // Kategoriler
+            // Kategori listesi
             item {
                 CategoryList(firebaseCategoryList, navController)
             }
 
-            // Sırala ve Filtrele butonları
+            // Sırala ve filtrele butonları
             item {
                 SortAndFilterButtons()
             }
 
-            // Yana kaydırılabilir grid
+            // Yana kaydırılabilir grid görünüm
             item {
                 FoodGrid(foodList = foodList, navController = navController, viewModel = viewModel, userName = userName)
             }
 
-            item {
-                Text(text = "Kategoriler", style = MaterialTheme.typography.titleLarge, color = PrimaryTextColor, modifier = Modifier.fillMaxWidth().padding(top = 16.dp), textAlign = TextAlign.Center)
-            }
-
-            // Kategorilere göre yemekleri listele
+            // Kategorilere göre yiyecekleri listele
             items(firebaseCategoryList.keys.toList()) { category ->
                 val filteredFoodList = firebaseFoodList.filter { it.yemek_kategori == category }
                 CategoryFoodList(filteredFoodList, category, navController, viewModel, userName)
@@ -151,6 +156,11 @@ fun HomeScreen(
     }
 }
 
+/**
+ * HomeTopAppBar bileşeni, ana sayfanın üst barını oluşturur.
+ * Kullanıcı adresini ve Food Fleet başlığını gösterir.
+ * Profil ve sepet simgelerine tıklanabilir.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeTopAppBar(navController: NavController, userAddress: String, userName: String) {
@@ -173,13 +183,15 @@ fun HomeTopAppBar(navController: NavController, userAddress: String, userName: S
         navigationIcon = {
             Icon(
                 imageVector = Icons.Default.ManageAccounts,
-                contentDescription = "App Icon",
+                contentDescription = "Profil Simgesi",
                 tint = PrimaryTextColor,
-                modifier = Modifier.padding(start = 8.dp, end = 8.dp).size(32.dp).clickable { navController.navigate("ProfileScreen") }
+                modifier = Modifier.padding(start = 8.dp, end = 8.dp)
+                    .size(32.dp)
+                    .clickable { navController.navigate("ProfileScreen") }
             )
         },
         actions = {
-            IconButton(onClick = { /* Profil simgesi işlevi */ }) {
+            IconButton(onClick = { /* Favorilere gitme işlevi */ }) {
                 Icon(
                     imageVector = Icons.Default.Favorite,
                     contentDescription = "Favoriler Icon",
@@ -197,6 +209,11 @@ fun HomeTopAppBar(navController: NavController, userAddress: String, userName: S
     )
 }
 
+/**
+ * CouponPager bileşeni, kuponları yana kaydırılabilir bir yapı ile gösterir.
+ *
+ * @param firebaseCouponList Gösterilecek kuponların listesi
+ */
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun CouponPager(firebaseCouponList: List<FirebaseCoupon>) {
@@ -246,6 +263,12 @@ fun CouponPager(firebaseCouponList: List<FirebaseCoupon>) {
     }
 }
 
+/**
+ * PagerIndicator bileşeni, kupon pager'ının sayfa göstergelerini oluşturur.
+ *
+ * @param totalPages Toplam sayfa sayısı
+ * @param currentPage Mevcut sayfa
+ */
 @Composable
 fun PagerIndicator(totalPages: Int, currentPage: Int) {
     Row(
@@ -267,6 +290,9 @@ fun PagerIndicator(totalPages: Int, currentPage: Int) {
     }
 }
 
+/**
+ * SearchBar bileşeni, arama çubuğunu oluşturur ve tıklanınca arama ekranına yönlendirir.
+ */
 @Composable
 fun SearchBar(navController: NavController) {
     Card(
@@ -301,6 +327,12 @@ fun SearchBar(navController: NavController) {
     }
 }
 
+/**
+ * CategoryList bileşeni, kategorileri yatay kaydırılabilir bir listede gösterir.
+ *
+ * @param categories Kategori isimleri ve görsellerinin haritası
+ * @param navController Navigasyon kontrolcüsü
+ */
 @Composable
 fun CategoryList(categories: Map<String, String>, navController: NavController) {
     LazyRow(
@@ -315,6 +347,13 @@ fun CategoryList(categories: Map<String, String>, navController: NavController) 
     }
 }
 
+/**
+ * CategoryCard bileşeni, her bir kategoriyi kart olarak gösterir.
+ *
+ * @param category Kategori ismi
+ * @param imageUrl Kategori görsel URL'si
+ * @param navController Navigasyon kontrolcüsü
+ */
 @Composable
 fun CategoryCard(category: String, imageUrl: String?, navController: NavController) {
     Card(
@@ -350,8 +389,9 @@ fun CategoryCard(category: String, imageUrl: String?, navController: NavControll
     }
 }
 
-
-
+/**
+ * SortAndFilterButtons bileşeni, sıralama ve filtreleme butonlarını gösterir.
+ */
 @Composable
 fun SortAndFilterButtons() {
     Row(
@@ -401,6 +441,14 @@ fun SortAndFilterButtons() {
     }
 }
 
+/**
+ * FoodGrid bileşeni, yiyecekleri yana kaydırılabilir grid biçiminde gösterir.
+ *
+ * @param foodList Yiyeceklerin listesi
+ * @param navController Navigasyon kontrolcüsü
+ * @param viewModel Ana ekranın ViewModel'i
+ * @param userName Kullanıcı ismi
+ */
 @Composable
 fun FoodGrid(foodList: List<Food>, navController: NavController, viewModel: HomeViewModel, userName: String) {
     LazyRow(
@@ -421,6 +469,14 @@ fun FoodGrid(foodList: List<Food>, navController: NavController, viewModel: Home
     }
 }
 
+/**
+ * FoodCard bileşeni, her bir yiyecek öğesini kart olarak gösterir.
+ *
+ * @param food Yiyecek bilgisi
+ * @param navController Navigasyon kontrolcüsü
+ * @param viewModel Ana ekranın ViewModel'i
+ * @param userName Kullanıcı ismi
+ */
 @Composable
 fun FoodCard(food: Food, navController: NavController, viewModel: HomeViewModel, userName : String) {
     Card(
@@ -499,6 +555,14 @@ fun FoodCard(food: Food, navController: NavController, viewModel: HomeViewModel,
     }
 }
 
+/**
+ * FoodCardFirebase bileşeni, Firebase'deki yiyecekleri kart olarak gösterir.
+ *
+ * @param food Firebase'den gelen yiyecek bilgisi
+ * @param navController Navigasyon kontrolcüsü
+ * @param viewModel Ana ekranın ViewModel'i
+ * @param userName Kullanıcı ismi
+ */
 @Composable
 fun FoodCardFirebase(food: FirebaseFood, navController: NavController, viewModel: HomeViewModel, userName : String) {
     Card(
@@ -578,6 +642,15 @@ fun FoodCardFirebase(food: FirebaseFood, navController: NavController, viewModel
     }
 }
 
+/**
+ * CategoryFoodList bileşeni, belirli bir kategorideki yiyecekleri listeler.
+ *
+ * @param filteredFoodList Kategorideki yiyeceklerin listesi
+ * @param category Kategori ismi
+ * @param navController Navigasyon kontrolcüsü
+ * @param viewModel Ana ekranın ViewModel'i
+ * @param userName Kullanıcı ismi
+ */
 @Composable
 fun CategoryFoodList(filteredFoodList: List<FirebaseFood>, category: String, navController: NavController, viewModel: HomeViewModel, userName : String) {
     Column {
@@ -598,5 +671,4 @@ fun CategoryFoodList(filteredFoodList: List<FirebaseFood>, category: String, nav
             }
         }
     }
-
 }

@@ -12,18 +12,14 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -51,7 +47,6 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.cloffygames.foodfleet.data.entity.Food
-import com.cloffygames.foodfleet.ui.theme.AddToCartButtonColor
 import com.cloffygames.foodfleet.ui.theme.BackgroundColor
 import com.cloffygames.foodfleet.ui.theme.PrimaryColor
 import com.cloffygames.foodfleet.ui.theme.PrimaryTextColor
@@ -61,19 +56,28 @@ import com.cloffygames.foodfleet.uix.viewmodel.SearchViewModel
 import com.google.gson.Gson
 import com.skydoves.landscapist.glide.GlideImage
 
+/**
+ * SearchScreen bileşeni, yiyecek ve kategori araması yapmayı sağlar. Kullanıcı
+ * yiyecek isimlerine göre arama yapabilir ve arama sonuçları yiyecek ve kategoriler
+ * olarak iki bölümde listelenir.
+ *
+ * @param navController Ekranlar arası geçiş için kullanılan NavController
+ * @param viewModel Arama işlemlerini ve veri akışını yöneten ViewModel
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SearchScreen(navController: NavController, viewModel: SearchViewModel) {
-    var searchQuery by remember { mutableStateOf(TextFieldValue("")) }
+    var searchQuery by remember { mutableStateOf(TextFieldValue("")) } // Arama metni
 
-    val combinedFoodList = remember { mutableStateListOf<Food>() }
+    val combinedFoodList = remember { mutableStateListOf<Food>() } // Firebase ve yerel yemek listelerinin birleşimi
 
-    // Combine firebaseFoodList and foodList
+    // Firebase ve yerel yemek listeleri gözlemleniyor
     val firebaseFoods by viewModel.firebaseFoodList.observeAsState(emptyList())
     val foods by viewModel.foodList.observeAsState(emptyList())
 
     val firebaseCategoryList by viewModel.firebaseCategoryList.observeAsState(emptyMap())
 
+    // Yiyecek listelerinin birleştirilmesi
     LaunchedEffect(firebaseFoods, foods) {
         combinedFoodList.clear()
         combinedFoodList.addAll(firebaseFoods.map { firebaseFood ->
@@ -85,9 +89,10 @@ fun SearchScreen(navController: NavController, viewModel: SearchViewModel) {
             )
         })
         combinedFoodList.addAll(foods)
-        viewModel.getFoods()
+        viewModel.getFoods() // Yiyecek verilerini al
     }
 
+    // Scaffold ile üst bar ve içerik bölümü düzenleniyor
     Scaffold(
         topBar = {
             TopAppBar(
@@ -122,7 +127,7 @@ fun SearchScreen(navController: NavController, viewModel: SearchViewModel) {
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.SpaceEvenly
             ) {
-                // Search bar
+                // Arama çubuğu
                 Card(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -160,7 +165,7 @@ fun SearchScreen(navController: NavController, viewModel: SearchViewModel) {
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                // Filtered food list
+                // Filtrelenen yemek listesi
                 val filteredFoodList = combinedFoodList.filter {
                     it.yemek_adi.contains(searchQuery.text, ignoreCase = true)
                 }
@@ -177,11 +182,13 @@ fun SearchScreen(navController: NavController, viewModel: SearchViewModel) {
                     modifier = Modifier.fillMaxHeight(0.5f)
                 ) {
                     items(filteredFoodList) { food ->
+                        // Arama sonuçlarına göre yemek kartı
                         Card(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .height(160.dp)
                                 .clickable {
+                                    // Yemek detaylarına geçiş
                                     val transitionFood = Food(food.yemek_id, food.yemek_adi, food.yemek_resim_adi, food.yemek_fiyat)
                                     val json = Uri.encode(Gson().toJson(transitionFood))
                                     navController.navigate("FoodDetailScreen/${json}")
@@ -239,7 +246,7 @@ fun SearchScreen(navController: NavController, viewModel: SearchViewModel) {
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                // Category list based on search query
+                // Arama sorgusuna dayalı kategori listesi
                 val filteredCategoryList = firebaseFoods
                     .filter { it.yemek_kategori.contains(searchQuery.text, ignoreCase = true) }
                     .map { it.yemek_kategori }
@@ -257,6 +264,7 @@ fun SearchScreen(navController: NavController, viewModel: SearchViewModel) {
                         modifier = Modifier.fillMaxWidth()
                     ) {
                         items(filteredCategoryList) { category ->
+                            // Kategori kartları
                             Card(
                                 modifier = Modifier
                                     .width(125.dp)
@@ -297,4 +305,3 @@ fun SearchScreen(navController: NavController, viewModel: SearchViewModel) {
         }
     )
 }
-

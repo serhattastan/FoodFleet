@@ -9,13 +9,11 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
@@ -30,7 +28,6 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -70,6 +67,14 @@ import com.cloffygames.foodfleet.uix.viewmodel.FoodDetailViewModel
 import com.google.gson.Gson
 import com.skydoves.landscapist.glide.GlideImage
 
+/**
+ * FoodDetailScreen bileşeni, yiyecek detaylarını görüntüler. Kullanıcı yiyecek hakkında bilgi
+ * alabilir, miktarını değiştirebilir ve sepete ekleyebilir.
+ *
+ * @param food Gösterilecek yiyecek bilgisi
+ * @param navController Navigasyon kontrolcüsü
+ * @param viewModel Yiyecek detaylarını yöneten ViewModel
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FoodDetailScreen(food: Food, navController: NavController, viewModel: FoodDetailViewModel) {
@@ -90,6 +95,7 @@ fun FoodDetailScreen(food: Food, navController: NavController, viewModel: FoodDe
         )
     }
 
+    // Scaffold bileşeni, ekranın üst barı ve ana içeriğini düzenler
     Scaffold(
         topBar = {
             TopAppBar(
@@ -126,17 +132,15 @@ fun FoodDetailScreen(food: Food, navController: NavController, viewModel: FoodDe
                     .height(332.dp)
                     .padding(16.dp)
                     .clip(RoundedCornerShape(16.dp)) // Köşeleri yuvarlatma işlemi
-                    .shadow(8.dp, shape = RoundedCornerShape(16.dp)) // Elevation/gölge eklenmesi
-                    .background(SecondaryColor, shape = RoundedCornerShape(16.dp)), // Arka plan da aynı şekli alacak
+                    .shadow(8.dp, shape = RoundedCornerShape(16.dp)) // Gölge eklenmesi
+                    .background(SecondaryColor, shape = RoundedCornerShape(16.dp)), // Arka plan rengi
                 contentScale = ContentScale.Crop,
                 loading = { ShimmerEffect(modifier = Modifier.fillMaxSize()) },
                 failure = {
-                    // Eğer resim yüklenemezse, imageUrl'yi yemek_resim_adi olarak güncelle
+                    // Eğer resim yüklenemezse, imageUrl'yi güncelle
                     imageUrl = food.yemek_resim_adi
                 }
             )
-
-
 
             Spacer(modifier = Modifier.height(16.dp))
 
@@ -159,12 +163,13 @@ fun FoodDetailScreen(food: Food, navController: NavController, viewModel: FoodDe
 
             Spacer(modifier = Modifier.height(16.dp))
 
+            // Miktar Ayarlama Kartı
             Card(
                 modifier = Modifier
                     .padding(16.dp),
-                shape = RoundedCornerShape(16.dp), // Köşeleri yuvarlatılmış bir kart
-                elevation = CardDefaults.cardElevation(defaultElevation = 4.dp), // Kartın gölgesi
-                colors = CardDefaults.cardColors(containerColor = BackgroundColor) // Arka plan rengi
+                shape = RoundedCornerShape(16.dp),
+                elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+                colors = CardDefaults.cardColors(containerColor = BackgroundColor)
             ) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
@@ -172,9 +177,9 @@ fun FoodDetailScreen(food: Food, navController: NavController, viewModel: FoodDe
                     modifier = Modifier
                         .padding(16.dp)
                         .wrapContentWidth() // Genişlik sadece gereken kadar olacak
-                        .height(20.dp) // Butonun yüksekliği
+                        .height(20.dp) // Buton yüksekliği
                 ) {
-                    // Azalt Butonu
+                    // Miktarı azalt butonu
                     IconButton(
                         onClick = { if (quantity > 1) quantity-- },
                         modifier = Modifier.size(40.dp)
@@ -182,15 +187,7 @@ fun FoodDetailScreen(food: Food, navController: NavController, viewModel: FoodDe
                         Icon(Icons.Default.Remove, contentDescription = "Azalt", tint = PrimaryTextColor)
                     }
 
-                    // Dikey Çizgi (Butonlar Arası)
-                    Divider(
-                        color = SecondaryTextColor,
-                        modifier = Modifier
-                            .fillMaxHeight(0.6f) // Çizginin yüksekliği (0.6f ile %60 oranında)
-                            .width(1.dp)
-                    )
-
-                    // Miktar
+                    // Miktar gösterimi
                     Text(
                         text = quantity.toString(),
                         fontSize = 20.sp,
@@ -199,15 +196,7 @@ fun FoodDetailScreen(food: Food, navController: NavController, viewModel: FoodDe
                         color = PrimaryTextColor
                     )
 
-                    // Dikey Çizgi (Butonlar Arası)
-                    Divider(
-                        color = SecondaryTextColor,
-                        modifier = Modifier
-                            .fillMaxHeight(0.6f) // Çizginin yüksekliği (0.6f ile %60 oranında)
-                            .width(1.dp)
-                    )
-
-                    // Arttır Butonu
+                    // Miktarı artır butonu
                     IconButton(
                         onClick = { quantity++ },
                         modifier = Modifier.size(40.dp)
@@ -219,7 +208,7 @@ fun FoodDetailScreen(food: Food, navController: NavController, viewModel: FoodDe
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            // Sepet Fiyatı ve Sepete Ekle Butonu
+            // Sepete Ekleme Bölümü
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -234,7 +223,7 @@ fun FoodDetailScreen(food: Food, navController: NavController, viewModel: FoodDe
                     color = PrimaryTextColor
                 )
                 Button(
-                    onClick = { viewModel.addFoodToCart(food.yemek_adi, food.yemek_resim_adi, food.yemek_fiyat, quantity, userName) },
+                    onClick = { viewModel.addFoodToCart(food.yemek_adi, imageUrl, food.yemek_fiyat * quantity, quantity, userName) },
                     colors = ButtonDefaults.buttonColors(containerColor = PrimaryColor),
                     modifier = Modifier.padding(8.dp)
                 ) {
@@ -267,9 +256,16 @@ fun FoodDetailScreen(food: Food, navController: NavController, viewModel: FoodDe
     }
 }
 
-// Yeni bir önerilen ürün kartı
+/**
+ * RecommendedFoodCard bileşeni, önerilen yiyeceklerin kart biçiminde gösterimini sağlar.
+ *
+ * @param food Gösterilecek önerilen yiyecek bilgisi
+ * @param navController Navigasyon kontrolcüsü
+ * @param viewModel Yiyecek detaylarını yöneten ViewModel
+ * @param userName Kullanıcı ismi
+ */
 @Composable
-fun RecommendedFoodCard(food: FirebaseFood, navController: NavController, viewModel: FoodDetailViewModel,userName: String) {
+fun RecommendedFoodCard(food: FirebaseFood, navController: NavController, viewModel: FoodDetailViewModel, userName: String) {
     Card(
         modifier = Modifier
             .size(200.dp, 166.dp)
@@ -328,7 +324,7 @@ fun RecommendedFoodCard(food: FirebaseFood, navController: NavController, viewMo
                 ) {
                     Icon(
                         imageVector = Icons.Default.FavoriteBorder,
-                        contentDescription = "Add to Cart",
+                        contentDescription = "Add to Favorite",
                         tint = AddToCartButtonColor
                     )
                 }
@@ -347,5 +343,3 @@ fun RecommendedFoodCard(food: FirebaseFood, navController: NavController, viewMo
         }
     }
 }
-
-
