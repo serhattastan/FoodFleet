@@ -33,7 +33,9 @@ fun Transitions(
     foodDetailViewModel: FoodDetailViewModel,
     categoryDetailScreenViewModel: CategoryDetailScreenViewModel,
     cartViewModel: CartViewModel,
-    searchViewModel: SearchViewModel
+    searchViewModel: SearchViewModel,
+    orderHistoryViewModel: OrderHistoryViewModel,
+    orderHistoryDetailViewModel: OrderHistoryDetailViewModel
 ){
     // Navigasyon kontrolcüsü, uygulama içi ekranlar arasında geçişi yönetir
     val navController = rememberNavController()
@@ -105,6 +107,19 @@ fun Transitions(
         // SearchScreen: Arama ekranı, kullanıcının yiyecek araması yapmasını sağlar
         composable("SearchScreen"){
             SearchScreen(navController, searchViewModel)
+        }
+        composable("OrderHistoryScreen"){
+            OrderHistoryScreen(navController, orderHistoryViewModel)
+        }
+        composable("OrderDetailScreen/{orderId}",
+            arguments = listOf(
+                navArgument("orderId"){
+                    type = NavType.StringType
+                }
+            )
+        ){
+            val orderId = it.arguments?.getString("orderId")
+            OrderHistoryDetailScreen(navController, orderId.toString(), orderHistoryDetailViewModel)
         }
     }
 }

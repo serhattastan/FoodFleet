@@ -30,6 +30,7 @@ import androidx.compose.material.icons.automirrored.filled.Sort
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.FilterList
+import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.ManageAccounts
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.ShoppingCart
@@ -198,6 +199,13 @@ fun HomeTopAppBar(navController: NavController, userAddress: String, userName: S
             )
         },
         actions = {
+            IconButton(onClick = { navController.navigate("OrderHistoryScreen") }) {
+                Icon(
+                    imageVector = Icons.Default.History,
+                    contentDescription = "Favoriler Icon",
+                    tint = AddToCartButtonColor
+                )
+            }
             IconButton(onClick = { /* Favorilere gitme işlevi */ }) {
                 Icon(
                     imageVector = Icons.Default.Favorite,
