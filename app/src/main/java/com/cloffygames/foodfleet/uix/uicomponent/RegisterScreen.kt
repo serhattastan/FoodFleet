@@ -114,13 +114,13 @@ fun RegisterScreen(onLoginClick: () -> Unit, authViewModel: AuthViewModel, navCo
 
         if (isEmailEmpty) {
             Text(
-                text = "Email cannot be empty",
+                text = "Email boş bırakılamaz",
                 color = Color.Red,
                 fontSize = 12.sp
             )
         } else if (!isEmailValid) {
             Text(
-                text = "Invalid email format",
+                text = "Geçerli bir e-posta adresi giriniz",
                 color = Color.Red,
                 fontSize = 12.sp
             )
@@ -136,7 +136,7 @@ fun RegisterScreen(onLoginClick: () -> Unit, authViewModel: AuthViewModel, navCo
                 isPasswordEmpty = password.isEmpty() // Parola boş mu?
                 isPasswordValid = password.length >= 6 // Şifrenin minimum uzunluk kontrolü
             },
-            label = { Text("Password") },
+            label = { Text("Şifre") },
             isError = !isPasswordValid || isPasswordEmpty, // Parola doğrulama ve boşluk kontrolü
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
             visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
@@ -157,13 +157,13 @@ fun RegisterScreen(onLoginClick: () -> Unit, authViewModel: AuthViewModel, navCo
 
         if (isPasswordEmpty) {
             Text(
-                text = "Password cannot be empty",
+                text = "Şifre boş bırakılamaz.",
                 color = Color.Red,
                 fontSize = 12.sp
             )
         } else if (!isPasswordValid) {
             Text(
-                text = "Password must be at least 6 characters",
+                text = "Şifre en az 6 karakter olmalıdır.",
                 color = Color.Red,
                 fontSize = 12.sp
             )
@@ -179,7 +179,7 @@ fun RegisterScreen(onLoginClick: () -> Unit, authViewModel: AuthViewModel, navCo
                 isConfirmPasswordEmpty = confirmPassword.isEmpty() // Şifre onayı boş mu?
                 isConfirmPasswordValid = password == confirmPassword // Şifreler eşleşiyor mu?
             },
-            label = { Text("Confirm Password") },
+            label = { Text("Şifre onay") },
             isError = !isConfirmPasswordValid || isConfirmPasswordEmpty, // Şifre eşleşme doğrulaması ve boşluk kontrolü
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
             visualTransformation = if (confirmPasswordVisible) VisualTransformation.None else PasswordVisualTransformation(),
@@ -199,13 +199,13 @@ fun RegisterScreen(onLoginClick: () -> Unit, authViewModel: AuthViewModel, navCo
 
         if (isConfirmPasswordEmpty) {
             Text(
-                text = "Confirm Password cannot be empty",
+                text = "Şifre onayı boş bırakılamaz.",
                 color = Color.Red,
                 fontSize = 12.sp
             )
         } else if (!isConfirmPasswordValid) {
             Text(
-                text = "Passwords do not match",
+                text = "Şifreler eşleşmiyor.",
                 color = Color.Red,
                 fontSize = 12.sp
             )
@@ -232,7 +232,7 @@ fun RegisterScreen(onLoginClick: () -> Unit, authViewModel: AuthViewModel, navCo
                         }
                     }
                 } else {
-                    errorMessage = "Please fill in all fields correctly."
+                    errorMessage = "Lütfen tüm alanları doldurun."
                 }
             },
             modifier = Modifier
@@ -243,7 +243,7 @@ fun RegisterScreen(onLoginClick: () -> Unit, authViewModel: AuthViewModel, navCo
                 containerColor = PrimaryColor // Buton ana rengi
             )
         ) {
-            Text(text = "Sign Up", fontSize = 16.sp, fontWeight = FontWeight.Bold)
+            Text(text = "Kayıt Ol", fontSize = 16.sp, fontWeight = FontWeight.Bold)
         }
 
         if (errorMessage.isNotEmpty()) {
@@ -255,7 +255,7 @@ fun RegisterScreen(onLoginClick: () -> Unit, authViewModel: AuthViewModel, navCo
 
         // Giriş ekranına yönlendirme linki
         Text(
-            text = "Already have an account? Sign in",
+            text = "Bir hesabın var mı? Giriş yap.",
             modifier = Modifier.clickable { onLoginClick() },
             color = PrimaryColor, // Linkin rengi
             fontSize = 14.sp,

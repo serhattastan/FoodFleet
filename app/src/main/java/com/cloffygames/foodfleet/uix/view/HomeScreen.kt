@@ -60,6 +60,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.airbnb.lottie.compose.LottieAnimation
+import com.airbnb.lottie.compose.LottieCompositionSpec
+import com.airbnb.lottie.compose.LottieConstants
+import com.airbnb.lottie.compose.animateLottieCompositionAsState
+import com.airbnb.lottie.compose.rememberLottieComposition
+import com.cloffygames.foodfleet.R
 import com.cloffygames.foodfleet.data.entity.FirebaseCoupon
 import com.cloffygames.foodfleet.data.entity.FirebaseFood
 import com.cloffygames.foodfleet.data.entity.Food
@@ -164,6 +170,8 @@ fun HomeScreen(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeTopAppBar(navController: NavController, userAddress: String, userName: String) {
+    val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(R.raw.profile_icon_anim))
+    val progress by animateLottieCompositionAsState(composition, iterations = LottieConstants.IterateForever)
     TopAppBar(
         colors = (TopAppBarDefaults.topAppBarColors(containerColor = BackgroundColor)),
         title = {
@@ -181,12 +189,11 @@ fun HomeTopAppBar(navController: NavController, userAddress: String, userName: S
             }
         },
         navigationIcon = {
-            Icon(
-                imageVector = Icons.Default.ManageAccounts,
-                contentDescription = "Profil Simgesi",
-                tint = PrimaryTextColor,
-                modifier = Modifier.padding(start = 8.dp, end = 8.dp)
-                    .size(32.dp)
+            LottieAnimation(
+                composition = composition,
+                progress = progress,
+                modifier = Modifier
+                    .size(64.dp) // Animasyonun boyutu
                     .clickable { navController.navigate("ProfileScreen") }
             )
         },

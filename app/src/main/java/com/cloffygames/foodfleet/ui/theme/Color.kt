@@ -26,9 +26,7 @@ val SecondaryTextColor = Color(0xFF757575) // İkincil metin rengi, açık gri
 
 // Sepet Butonu Rengi
 val AddToCartButtonColor = Color(0xFFD32F2F) // Kırmızı ton, sepete ekle butonu için
-
-// Gölgelendirme ve Elevation
-val CardShadowColor = Color(0xFFE0E0E0) // Kartların gölgesi için açık gri
+val ExitButtonColor = Color(0xFF44001A) // Mavi ton, çıkış butonu için
 
 // Shimmer Effect Renkleri
 val ShimmerBaseColor = Color(0xFFE0E0E0) // Shimmer base rengi

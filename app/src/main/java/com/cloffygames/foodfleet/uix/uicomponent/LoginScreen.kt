@@ -93,12 +93,12 @@ fun LoginScreen(onRegisterClick: () -> Unit, authViewModel: AuthViewModel, navCo
                                 }
                             }
                         } else {
-                            errorMessage = error ?: "Google Sign-In failed"
+                            errorMessage = error ?: "Google Sign-In Başarısız!"
                         }
                     }
                 }
             } else {
-                errorMessage = "Google Sign-In failed"
+                errorMessage = "Google Sign-In Başarısız!"
             }
         }
     }
@@ -124,7 +124,7 @@ fun LoginScreen(onRegisterClick: () -> Unit, authViewModel: AuthViewModel, navCo
 
         // Hoşgeldiniz başlığı
         Text(
-            text = "Welcome!",
+            text = "Hoşgeldin!",
             fontWeight = FontWeight.Bold, // Kalın font
             fontSize = 24.sp,
             color = PrimaryColor // Tema renk dosyasından ana renk
@@ -148,7 +148,7 @@ fun LoginScreen(onRegisterClick: () -> Unit, authViewModel: AuthViewModel, navCo
         OutlinedTextField(
             value = password,
             onValueChange = { password = it }, // Kullanıcı parola girdiğinde değeri güncelle
-            label = { Text("Password") },
+            label = { Text("Parola") },
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password), // Parola klavyesi
             visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(), // Şifre görünürlüğü
             modifier = Modifier.fillMaxWidth(),
@@ -188,7 +188,7 @@ fun LoginScreen(onRegisterClick: () -> Unit, authViewModel: AuthViewModel, navCo
             shape = RoundedCornerShape(12.dp), // Köşeleri yuvarlat
             colors = ButtonDefaults.buttonColors(containerColor = PrimaryColor) // Tema ana rengi
         ) {
-            Text(text = "Sign In", fontSize = 16.sp, fontWeight = FontWeight.Bold)
+            Text(text = "Giriş Yap", fontSize = 16.sp, fontWeight = FontWeight.Bold)
         }
 
         // Hata mesajı gösterimi
@@ -211,14 +211,14 @@ fun LoginScreen(onRegisterClick: () -> Unit, authViewModel: AuthViewModel, navCo
             shape = RoundedCornerShape(12.dp),
             colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF4285F4), contentColor = Color.White) // Google buton rengi
         ) {
-            Text(text = "Sign in with Google", fontSize = 16.sp, fontWeight = FontWeight.Bold)
+            Text(text = "Google ile Giriş Yap", fontSize = 16.sp, fontWeight = FontWeight.Bold)
         }
 
         Spacer(modifier = Modifier.height(24.dp)) // 24dp boşluk
 
         // Kayıt sayfasına yönlendirme linki
         Text(
-            text = "Don't have an account? Sign up",
+            text = "Hesabınız yok mu? Kayıt olun.",
             modifier = Modifier.clickable { onRegisterClick() }, // Kayıt sayfasına yönlendirme
             color = SecondaryColor, // Tema ikincil rengi
             fontSize = 14.sp,

@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
@@ -125,7 +126,7 @@ fun SearchScreen(navController: NavController, viewModel: SearchViewModel) {
                     .background(BackgroundColor)
                     .padding(16.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.SpaceEvenly
+                verticalArrangement = Arrangement.Top
             ) {
                 // Arama çubuğu
                 Card(
@@ -151,8 +152,8 @@ fun SearchScreen(navController: NavController, viewModel: SearchViewModel) {
                         TextField(
                             value = searchQuery,
                             onValueChange = { newValue -> searchQuery = newValue },
-                            placeholder = { Text("Yemek, mutfak veya restoran arayın", color = SecondaryTextColor) },
-                            modifier = Modifier.fillMaxWidth(),
+                            placeholder = { Text("Yemek veya kategori arayın", color = SecondaryTextColor) },
+                            modifier = Modifier.fillMaxWidth().wrapContentHeight(),
                             singleLine = true,
                             colors = TextFieldDefaults.textFieldColors(
                                 containerColor = BackgroundColor,
@@ -179,7 +180,7 @@ fun SearchScreen(navController: NavController, viewModel: SearchViewModel) {
 
                 LazyColumn(
                     verticalArrangement = Arrangement.spacedBy(8.dp),
-                    modifier = Modifier.fillMaxHeight(0.5f)
+                    modifier = Modifier.fillMaxHeight(0.7f)
                 ) {
                     items(filteredFoodList) { food ->
                         // Arama sonuçlarına göre yemek kartı

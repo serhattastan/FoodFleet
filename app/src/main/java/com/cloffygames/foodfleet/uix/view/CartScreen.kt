@@ -16,6 +16,7 @@ import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -57,6 +58,7 @@ fun CartScreen(navController: NavController, viewModel: CartViewModel, userName:
 
     // Scaffold ile sepet ekranı düzenleniyor
     Scaffold(
+        modifier = Modifier.background(BackgroundColor),
         topBar = {
             CartTopAppBar(navController, "Sepetim")
         },
@@ -134,7 +136,8 @@ fun CouponCodeInput(
             label = { Text("Kupon Kodu") },
             modifier = Modifier.fillMaxWidth(),
             colors = TextFieldDefaults.textFieldColors(
-                containerColor = MaterialTheme.colorScheme.surface
+                containerColor = BackgroundColor,
+
             )
         )
 
@@ -145,7 +148,8 @@ fun CouponCodeInput(
             modifier = Modifier.fillMaxWidth(),
             enabled = appliedCoupon == null,
             colors = ButtonDefaults.buttonColors(
-                containerColor = PrimaryColor
+                containerColor = PrimaryColor,
+                contentColor = Color.White
             )
         ) {
             Text(text = "Kuponu Uygula")
@@ -155,7 +159,7 @@ fun CouponCodeInput(
             Text(
                 text = "Uygulanan Kupon: ${appliedCoupon.coupon_name}",
                 style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.primary
+                color = SecondaryTextColor
             )
         }
     }
@@ -171,6 +175,7 @@ fun CouponCodeInput(
 @Composable
 fun CartTopAppBar(navController: NavController, title: String) {
     TopAppBar(
+        colors = (TopAppBarDefaults.topAppBarColors(containerColor = BackgroundColor)),
         title = {
             Text(text = title, color = PrimaryTextColor)
         },
@@ -340,7 +345,9 @@ fun ConfirmCartButton(onConfirm: () -> Unit) {
         onClick = onConfirm,
         modifier = Modifier.fillMaxWidth(),
         colors = ButtonDefaults.buttonColors(
-            containerColor = AddToCartButtonColor
+            containerColor = AddToCartButtonColor,
+            contentColor = Color.White
+
         )
     ) {
         Text(text = "Sepeti Onayla", style = MaterialTheme.typography.bodyLarge)

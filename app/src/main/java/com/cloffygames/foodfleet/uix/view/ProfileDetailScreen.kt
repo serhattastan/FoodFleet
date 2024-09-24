@@ -7,14 +7,18 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Place
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -29,10 +33,19 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import com.airbnb.lottie.compose.LottieAnimation
+import com.airbnb.lottie.compose.LottieCompositionSpec
+import com.airbnb.lottie.compose.LottieConstants
+import com.airbnb.lottie.compose.animateLottieCompositionAsState
+import com.airbnb.lottie.compose.rememberLottieComposition
+import com.cloffygames.foodfleet.R
 import com.cloffygames.foodfleet.data.entity.User
 import com.cloffygames.foodfleet.ui.theme.BackgroundColor
+import com.cloffygames.foodfleet.ui.theme.PrimaryColor
+import com.cloffygames.foodfleet.ui.theme.PrimaryTextColor
 import com.cloffygames.foodfleet.uix.viewmodel.ProfileDetailViewModel
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProfileDetailScreen(viewModel: ProfileDetailViewModel, navController: NavController) {
     // Kullanıcı bilgileri için state'ler
@@ -41,20 +54,32 @@ fun ProfileDetailScreen(viewModel: ProfileDetailViewModel, navController: NavCon
     var userId by remember { mutableStateOf(TextFieldValue("")) }
     var userAddress by remember { mutableStateOf(TextFieldValue("")) }
 
+    // Lottie animasyonunu yükle ve sonsuz döngüde oynat
+    val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(R.raw.profile_icon_anim))
+    val progress by animateLottieCompositionAsState(composition, iterations = LottieConstants.IterateForever)
+
     val context = LocalContext.current
 
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(BackgroundColor)
+            .background(BackgroundColor)  // Tema dosyasından arka plan rengi
             .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
+
+        LottieAnimation(
+            composition = composition,
+            progress = progress,
+            modifier = Modifier
+                .size(375.dp, 250.dp) // Animasyonun boyutu
+        )
+
         Text(
             text = "Complete Your Profile",
             fontSize = 24.sp,
-            color = Color(0xFF333333),
+            color = PrimaryTextColor,  // Tema dosyasındaki metin rengi
             textAlign = TextAlign.Center,
             modifier = Modifier.padding(bottom = 24.dp)
         )
@@ -63,48 +88,64 @@ fun ProfileDetailScreen(viewModel: ProfileDetailViewModel, navController: NavCon
         TextField(
             value = userName,
             onValueChange = { userName = it },
-            label = { Text("First Name") },
+            label = { Text("First Name", color = PrimaryTextColor) },
             leadingIcon = { Icon(Icons.Default.Person, contentDescription = null) },
             shape = RoundedCornerShape(8.dp),
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(vertical = 8.dp)
+                .padding(vertical = 8.dp),
+            colors = TextFieldDefaults.outlinedTextFieldColors(
+                focusedLabelColor = PrimaryTextColor,
+                focusedBorderColor = PrimaryColor
+            )
         )
 
         // Kullanıcı soyismi için TextField
         TextField(
             value = userSurname,
             onValueChange = { userSurname = it },
-            label = { Text("Last Name") },
+            label = { Text("Last Name", color = PrimaryTextColor) },
             leadingIcon = { Icon(Icons.Default.Person, contentDescription = null) },
             shape = RoundedCornerShape(8.dp),
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(vertical = 8.dp)
+                .padding(vertical = 8.dp),
+            colors = TextFieldDefaults.outlinedTextFieldColors(
+                focusedLabelColor = PrimaryTextColor,
+                focusedBorderColor = PrimaryColor
+            )
         )
 
         // Kullanıcı ID için TextField (user_id @serhat123 formatında)
         TextField(
             value = userId,
             onValueChange = { userId = it },
-            label = { Text("User ID (e.g. @serhat123)") },
+            label = { Text("User ID (e.g. @serhat123)", color = PrimaryTextColor) },
             leadingIcon = { Icon(Icons.Default.Person, contentDescription = null) },
             shape = RoundedCornerShape(8.dp),
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(vertical = 8.dp)
+                .padding(vertical = 8.dp),
+            colors = TextFieldDefaults.outlinedTextFieldColors(
+                focusedLabelColor = PrimaryTextColor,
+                focusedBorderColor = PrimaryColor
+            )
         )
 
         // Kullanıcı adresi için TextField
         TextField(
             value = userAddress,
             onValueChange = { userAddress = it },
-            label = { Text("Address") },
+            label = { Text("Address", color = PrimaryTextColor) },
             leadingIcon = { Icon(Icons.Default.Place, contentDescription = null) },
             shape = RoundedCornerShape(8.dp),
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(vertical = 16.dp)
+                .padding(vertical = 16.dp),
+            colors = TextFieldDefaults.outlinedTextFieldColors(
+                focusedLabelColor = PrimaryTextColor,
+                focusedBorderColor = PrimaryColor
+            )
         )
 
         // Kaydet Butonu
@@ -128,7 +169,8 @@ fun ProfileDetailScreen(viewModel: ProfileDetailViewModel, navController: NavCon
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(top = 24.dp),
-            shape = RoundedCornerShape(8.dp)
+            shape = RoundedCornerShape(8.dp),
+            colors = ButtonDefaults.buttonColors(containerColor = PrimaryColor)
         ) {
             Text(text = "Save Details", color = Color.White, fontSize = 18.sp)
         }

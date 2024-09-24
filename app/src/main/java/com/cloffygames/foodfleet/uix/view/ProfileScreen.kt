@@ -7,10 +7,12 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -18,7 +20,9 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -28,9 +32,20 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.airbnb.lottie.compose.LottieAnimation
+import com.airbnb.lottie.compose.LottieCompositionSpec
+import com.airbnb.lottie.compose.LottieConstants
+import com.airbnb.lottie.compose.animateLottieCompositionAsState
+import com.airbnb.lottie.compose.rememberLottieComposition
+import com.cloffygames.foodfleet.R
 import com.cloffygames.foodfleet.data.entity.User
+import com.cloffygames.foodfleet.ui.theme.ExitButtonColor
+import com.cloffygames.foodfleet.ui.theme.PrimaryColor
+import com.cloffygames.foodfleet.ui.theme.PrimaryTextColor
+import com.cloffygames.foodfleet.ui.theme.SecondaryColor
 import com.cloffygames.foodfleet.uix.viewmodel.ProfileViewModel
 import kotlinx.coroutines.launch
 
@@ -45,6 +60,10 @@ fun ProfileScreen(navController: NavController, viewModel: ProfileViewModel) {
     var userId by remember { mutableStateOf("") }
     var userAddress by remember { mutableStateOf("") }
     var isLoading by remember { mutableStateOf(true) }
+
+    // Lottie animasyonunu yükle ve sonsuz döngüde oynat
+    val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(R.raw.profile_anim))
+    val progress by animateLottieCompositionAsState(composition, iterations = LottieConstants.IterateForever)
 
     // Kullanıcı bilgilerini çekme
     LaunchedEffect(Unit) {
@@ -63,17 +82,17 @@ fun ProfileScreen(navController: NavController, viewModel: ProfileViewModel) {
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Profil") },
+                title = { Text("Profil", color = Color.White) },  // Başlık rengini tema dosyasından al
                 navigationIcon = {
                     IconButton(onClick = { navController.popBackStack() }) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Geri")
+                        Icon(
+                            Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = "Geri",
+                            tint = Color.White  // Geri ikonunun rengi tema ile uyumlu
+                        )
                     }
                 },
-                actions = {
-                    IconButton(onClick = { /* Uygulama logosuna tıklama işlemi */ }) {
-                        Icon(Icons.Default.AccountCircle, contentDescription = "Uygulama Logosu")
-                    }
-                }
+                colors = TopAppBarDefaults.smallTopAppBarColors(containerColor = PrimaryColor)  // Üst barın arka plan rengini ayarla
             )
         },
         content = { padding ->
@@ -82,16 +101,31 @@ fun ProfileScreen(navController: NavController, viewModel: ProfileViewModel) {
                     .fillMaxSize()
                     .padding(padding)
                     .padding(16.dp),
-                verticalArrangement = Arrangement.Center
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally  // Merkezde hizala
             ) {
                 if (isLoading) {
-                    CircularProgressIndicator(modifier = Modifier.align(Alignment.CenterHorizontally))
+                    CircularProgressIndicator(
+                        modifier = Modifier.align(Alignment.CenterHorizontally),
+                        color = PrimaryColor  // Yükleniyor göstergesinin rengi tema ile uyumlu olsun
+                    )
                 } else {
+                    // Kullanıcı bilgilerini içeren TextField'lar
+                    LottieAnimation(
+                        composition = composition,
+                        progress = progress,
+                        modifier = Modifier
+                            .size(375.dp, 250.dp) // Animasyonun boyutu
+                    )
                     TextField(
                         value = userName,
                         onValueChange = { userName = it },
-                        label = { Text("Ad") },
-                        modifier = Modifier.fillMaxWidth()
+                        label = { Text("Ad", color = PrimaryTextColor) },  // Tema ile uyumlu metin rengi
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = TextFieldDefaults.outlinedTextFieldColors(
+                            focusedLabelColor = PrimaryTextColor,
+                            focusedBorderColor = PrimaryColor
+                        )
                     )
 
                     Spacer(modifier = Modifier.height(8.dp))
@@ -99,8 +133,12 @@ fun ProfileScreen(navController: NavController, viewModel: ProfileViewModel) {
                     TextField(
                         value = userSurname,
                         onValueChange = { userSurname = it },
-                        label = { Text("Soyad") },
-                        modifier = Modifier.fillMaxWidth()
+                        label = { Text("Soyad", color = PrimaryTextColor) },
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = TextFieldDefaults.outlinedTextFieldColors(
+                            focusedLabelColor = PrimaryTextColor,
+                            focusedBorderColor = PrimaryColor
+                        )
                     )
 
                     Spacer(modifier = Modifier.height(8.dp))
@@ -108,8 +146,12 @@ fun ProfileScreen(navController: NavController, viewModel: ProfileViewModel) {
                     TextField(
                         value = userId,
                         onValueChange = { userId = it },
-                        label = { Text("Kullanıcı Adı (@örnek)") },
-                        modifier = Modifier.fillMaxWidth()
+                        label = { Text("Kullanıcı Adı (@örnek)", color = PrimaryTextColor) },
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = TextFieldDefaults.outlinedTextFieldColors(
+                            focusedLabelColor = PrimaryTextColor,
+                            focusedBorderColor = PrimaryColor
+                        )
                     )
 
                     Spacer(modifier = Modifier.height(8.dp))
@@ -117,8 +159,12 @@ fun ProfileScreen(navController: NavController, viewModel: ProfileViewModel) {
                     TextField(
                         value = userAddress,
                         onValueChange = { userAddress = it },
-                        label = { Text("Adres") },
-                        modifier = Modifier.fillMaxWidth()
+                        label = { Text("Adres", color = PrimaryTextColor) },
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = TextFieldDefaults.outlinedTextFieldColors(
+                            focusedLabelColor = PrimaryTextColor,
+                            focusedBorderColor = PrimaryColor
+                        )
                     )
 
                     Spacer(modifier = Modifier.height(16.dp))
@@ -139,9 +185,10 @@ fun ProfileScreen(navController: NavController, viewModel: ProfileViewModel) {
                                 )
                             }
                         },
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = ButtonDefaults.buttonColors(containerColor = PrimaryColor)
                     ) {
-                        Text("Kaydet")
+                        Text("Kaydet", color = Color.White)
                     }
                 }
 
@@ -150,14 +197,15 @@ fun ProfileScreen(navController: NavController, viewModel: ProfileViewModel) {
                 Button(
                     onClick = {
                         viewModel.logout {
-                            navController.navigate("AuthScreen") // Çıkış sonrası yönlendirme
+                            navController.navigate("AuthScreen")  // Çıkış sonrası yönlendirme
                         }
                     },
                     modifier = Modifier
                         .fillMaxWidth()
-                        .align(Alignment.CenterHorizontally)
+                        .align(Alignment.CenterHorizontally),
+                    colors = ButtonDefaults.buttonColors(containerColor = ExitButtonColor)
                 ) {
-                    Text("Çıkış Yap")
+                    Text("Çıkış Yap", color = Color.White)
                 }
             }
         }
