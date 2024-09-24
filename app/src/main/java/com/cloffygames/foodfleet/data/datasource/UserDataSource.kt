@@ -47,4 +47,16 @@ class UserDataSource(
                 .addOnFailureListener { e -> onFailure(e) }
         }
     }
+
+    fun getUserData(uid: String, onResult: (User?) -> Unit) {
+        firestore.collection("users").document(uid).get()
+            .addOnSuccessListener { document ->
+                val user = document.toObject(User::class.java)
+                onResult(user)
+            }
+            .addOnFailureListener {
+                onResult(null)
+            }
+    }
+
 }

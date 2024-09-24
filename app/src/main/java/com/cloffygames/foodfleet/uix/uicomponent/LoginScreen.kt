@@ -2,6 +2,7 @@ package com.cloffygames.foodfleet.uix.uicomponent
 
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -17,7 +18,6 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -42,6 +42,9 @@ import com.airbnb.lottie.compose.LottieConstants
 import com.airbnb.lottie.compose.animateLottieCompositionAsState
 import com.airbnb.lottie.compose.rememberLottieComposition
 import com.cloffygames.foodfleet.R
+import com.cloffygames.foodfleet.ui.theme.BackgroundColor
+import com.cloffygames.foodfleet.ui.theme.PrimaryColor
+import com.cloffygames.foodfleet.ui.theme.SecondaryColor
 import com.cloffygames.foodfleet.uix.viewmodel.AuthViewModel
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 
@@ -53,11 +56,10 @@ import com.google.android.gms.auth.api.signin.GoogleSignIn
  */
 @Composable
 fun LoginScreen(onRegisterClick: () -> Unit, authViewModel: AuthViewModel, navController: NavController) {
-    // E-posta, parola ve hata mesajı için state değişkenleri oluşturuluyor
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var errorMessage by remember { mutableStateOf("") }
-    var passwordVisible by remember { mutableStateOf(false) }  // Şifre görünürlüğünü kontrol eden state
+    var passwordVisible by remember { mutableStateOf(false) }
 
     // Lottie animasyonunu yükle ve sonsuz döngüde oynat
     val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(R.raw.auth_anim))
@@ -74,9 +76,21 @@ fun LoginScreen(onRegisterClick: () -> Unit, authViewModel: AuthViewModel, navCo
                 account?.idToken?.let { token ->
                     authViewModel.signInWithGoogle(token) { success, error ->
                         if (success) {
-                            // Google girişi başarılı olursa ana ekrana yönlendirme
-                            navController.navigate("HomeScreen") {
-                                popUpTo("LoginScreen") { inclusive = true }
+                            // Kullanıcıyı kontrol et
+                            authViewModel.getCurrentUser()?.let { firebaseUser ->
+                                authViewModel.checkIfUserExists(firebaseUser.uid) { userExists ->
+                                    if (userExists) {
+                                        // Kullanıcı mevcutsa HomeScreen'e yönlendir
+                                        navController.navigate("HomeScreen") {
+                                            popUpTo("LoginScreen") { inclusive = true }
+                                        }
+                                    } else {
+                                        // Kullanıcı mevcut değilse ProfileDetailScreen'e yönlendir
+                                        navController.navigate("ProfileDetailScreen") {
+                                            popUpTo("LoginScreen") { inclusive = true }
+                                        }
+                                    }
+                                }
                             }
                         } else {
                             errorMessage = error ?: "Google Sign-In failed"
@@ -93,7 +107,8 @@ fun LoginScreen(onRegisterClick: () -> Unit, authViewModel: AuthViewModel, navCo
     Column(
         modifier = Modifier
             .fillMaxSize() // Tüm ekranı kapla
-            .padding(16.dp), // Ekranın kenarlarından 16dp boşluk bırak
+            .padding(16.dp)
+            .background(BackgroundColor), // Ekranın kenarlarından 16dp boşluk bırak
         horizontalAlignment = Alignment.CenterHorizontally, // Yatayda ortala
         verticalArrangement = Arrangement.Center // Dikeyde ortala
     ) {
@@ -110,11 +125,9 @@ fun LoginScreen(onRegisterClick: () -> Unit, authViewModel: AuthViewModel, navCo
         // Hoşgeldiniz başlığı
         Text(
             text = "Welcome!",
-            style = MaterialTheme.typography.headlineSmall.copy(
-                fontWeight = FontWeight.Bold, // Kalın font
-                fontSize = 24.sp
-            ),
-            color = MaterialTheme.colorScheme.primary // Ana renk
+            fontWeight = FontWeight.Bold, // Kalın font
+            fontSize = 24.sp,
+            color = PrimaryColor // Tema renk dosyasından ana renk
         )
 
         Spacer(modifier = Modifier.height(16.dp)) // 16dp boşluk
@@ -126,7 +139,7 @@ fun LoginScreen(onRegisterClick: () -> Unit, authViewModel: AuthViewModel, navCo
             label = { Text("Email") },
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email), // E-posta klavyesi
             modifier = Modifier.fillMaxWidth(), // Tüm genişliği kapla
-            shape = RoundedCornerShape(12.dp) // Köşeleri yuvarlat
+            shape = RoundedCornerShape(12.dp), // Köşeleri yuvarlat
         )
 
         Spacer(modifier = Modifier.height(12.dp)) // 12dp boşluk
@@ -147,10 +160,10 @@ fun LoginScreen(onRegisterClick: () -> Unit, authViewModel: AuthViewModel, navCo
                     painterResource(id = R.drawable.icon_visibility_off)
 
                 IconButton(onClick = { passwordVisible = !passwordVisible }) {
-                    Icon(painter = image, contentDescription = null, modifier = Modifier.size(20.dp)) // İkonun boyutu
+                    Icon(painter = image, contentDescription = null, modifier = Modifier.size(20.dp))
                 }
             },
-            shape = RoundedCornerShape(12.dp)
+            shape = RoundedCornerShape(12.dp),
         )
 
         Spacer(modifier = Modifier.height(24.dp)) // 24dp boşluk
@@ -173,9 +186,9 @@ fun LoginScreen(onRegisterClick: () -> Unit, authViewModel: AuthViewModel, navCo
                 .fillMaxWidth()
                 .height(45.dp), // Butonun yüksekliği
             shape = RoundedCornerShape(12.dp), // Köşeleri yuvarlat
-            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary) // Buton rengi
+            colors = ButtonDefaults.buttonColors(containerColor = PrimaryColor) // Tema ana rengi
         ) {
-            Text(text = "Sign In", fontSize = 16.sp, fontWeight = FontWeight.Bold) // Buton metni
+            Text(text = "Sign In", fontSize = 16.sp, fontWeight = FontWeight.Bold)
         }
 
         // Hata mesajı gösterimi
@@ -198,7 +211,7 @@ fun LoginScreen(onRegisterClick: () -> Unit, authViewModel: AuthViewModel, navCo
             shape = RoundedCornerShape(12.dp),
             colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF4285F4), contentColor = Color.White) // Google buton rengi
         ) {
-            Text(text = "Sign in with Google", fontSize = 16.sp, fontWeight = FontWeight.Bold) // Buton metni
+            Text(text = "Sign in with Google", fontSize = 16.sp, fontWeight = FontWeight.Bold)
         }
 
         Spacer(modifier = Modifier.height(24.dp)) // 24dp boşluk
@@ -207,7 +220,7 @@ fun LoginScreen(onRegisterClick: () -> Unit, authViewModel: AuthViewModel, navCo
         Text(
             text = "Don't have an account? Sign up",
             modifier = Modifier.clickable { onRegisterClick() }, // Kayıt sayfasına yönlendirme
-            color = MaterialTheme.colorScheme.primary, // Metin rengi
+            color = SecondaryColor, // Tema ikincil rengi
             fontSize = 14.sp,
             fontWeight = FontWeight.Medium
         )

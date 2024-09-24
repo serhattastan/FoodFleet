@@ -2,6 +2,7 @@ package com.cloffygames.foodfleet.uix.viewmodel
 
 import androidx.lifecycle.ViewModel
 import com.cloffygames.foodfleet.data.repo.AuthenticationRepository
+import com.cloffygames.foodfleet.data.repo.UserRepository
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.firebase.auth.FirebaseUser
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -12,7 +13,7 @@ import javax.inject.Inject
  * AuthenticationRepository kullanılarak Google ve e-posta ile kimlik doğrulama işlevlerini sağlar.
  */
 @HiltViewModel
-class AuthViewModel @Inject constructor(private val authRepo: AuthenticationRepository) : ViewModel() {
+class AuthViewModel @Inject constructor(private val authRepo: AuthenticationRepository, private val userRepo: UserRepository) : ViewModel() {
 
     /**
      * Kullanıcı e-posta ve şifre ile giriş yapar.
@@ -72,4 +73,15 @@ class AuthViewModel @Inject constructor(private val authRepo: AuthenticationRepo
     fun isUserLoggedIn(): Boolean {
         return getCurrentUser() != null
     }
+
+    fun checkIfUserExists(uid: String, onResult: (Boolean) -> Unit) {
+        userRepo.getUserData(uid) { user ->
+            if (user != null) {
+                onResult(true) // Kullanıcı mevcut
+            } else {
+                onResult(false) // Kullanıcı yok, ilk defa giriş yapıyor
+            }
+        }
+    }
+
 }

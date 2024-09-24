@@ -10,4 +10,6 @@ class UserRepository(private val userDataSource: UserDataSource) {
 
     fun updateUser(user: User, onSuccess: () -> Unit, onFailure: (Exception) -> Unit) = userDataSource.updateUser(user, onSuccess, onFailure)
 
+    fun getUserData(uid: String, onResult: (User?) -> Unit) = userDataSource.getUserData(uid, onResult)
+
 }
