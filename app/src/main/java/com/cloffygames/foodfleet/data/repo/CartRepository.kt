@@ -58,4 +58,6 @@ class CartRepository(private val cartDataSource: CartDataSource) {
 
     suspend fun decreaseFoodQuantity(cartItem: Cart) = cartDataSource.decreaseFoodQuantity(cartItem)
 
+    suspend fun deleteAllFoodsFromCart(kullanici_adi: String, cartFoodList: List<Cart>) = cartDataSource.deleteAllFoodsFromCart(kullanici_adi, cartFoodList)
+
 }

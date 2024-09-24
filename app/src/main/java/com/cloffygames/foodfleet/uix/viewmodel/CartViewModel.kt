@@ -1,5 +1,6 @@
 package com.cloffygames.foodfleet.uix.viewmodel
 
+import androidx.compose.runtime.Composable
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -8,12 +9,15 @@ import com.cloffygames.foodfleet.data.entity.Cart
 import com.cloffygames.foodfleet.data.entity.FirebaseCoupon
 import com.cloffygames.foodfleet.data.entity.FirebaseFood
 import com.cloffygames.foodfleet.data.entity.Food
+import com.cloffygames.foodfleet.data.entity.OrderHistory
 import com.cloffygames.foodfleet.data.entity.User
 import com.cloffygames.foodfleet.data.repo.CartRepository
 import com.cloffygames.foodfleet.data.repo.FirebaseCouponRepository
 import com.cloffygames.foodfleet.data.repo.FirebaseFoodRepository
 import com.cloffygames.foodfleet.data.repo.FoodRepository
 import com.cloffygames.foodfleet.data.repo.UserRepository
+import com.google.firebase.Timestamp
+import com.google.firebase.auth.FirebaseAuth
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -118,4 +122,38 @@ class CartViewModel @Inject constructor(
      * @param onFailure Başarısız olursa hatayı geri döner
      */
     fun getUser(onSuccess: (User) -> Unit, onFailure: (Exception) -> Unit) = userRepository.getUser(onSuccess, onFailure)
+
+    fun addOrderHistory(
+        cartFoodList: List<Cart>,
+        appliedCoupon: FirebaseCoupon?,
+        onSuccess: () -> Unit,
+        onFailure: (Exception) -> Unit
+    ) {
+        val uid = FirebaseAuth.getInstance().currentUser?.uid
+        uid?.let {
+            val orderHistory = OrderHistory(
+                order_id = "", // Benzersiz bir ID oluşturulacak
+                sepet_listesi = cartFoodList,
+                toplam_fiyat = cartFoodList.sumOf { it.yemek_fiyat },
+                siparis_tarihi = Timestamp.now(),  // Firebase Timestamp kullanarak sipariş tarihi
+                kupon_kodu = appliedCoupon?.coupon_code ?: "kullanilmadi"  // Kupon kodu yoksa "kullanilmadi"
+            )
+            viewModelScope.launch {
+                userRepository.addOrderHistory(orderHistory, {
+                    onSuccess()
+                }, { e ->
+                    onFailure(e)
+                })
+            }
+        }
+    }
+
+    fun deleteAllFoodsFromCart(kullanici_adi: String, cartFoodList: List<Cart>) {
+        viewModelScope.launch {
+            cartRepository.deleteAllFoodsFromCart(kullanici_adi, cartFoodList)
+        }
+    }
+
+
+
 }

@@ -1,5 +1,6 @@
 package com.cloffygames.foodfleet.uix.view
 
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -18,6 +19,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -34,6 +36,7 @@ import com.cloffygames.foodfleet.ui.theme.SecondaryTextColor
 import com.cloffygames.foodfleet.uix.uicomponent.ShimmerEffect
 import com.cloffygames.foodfleet.uix.viewmodel.CartViewModel
 import com.skydoves.landscapist.glide.GlideImage
+import kotlinx.coroutines.launch
 
 /**
  * CartScreen bileşeni, kullanıcı sepetinde bulunan yiyeceklerin listesini gösterir.
@@ -52,12 +55,17 @@ fun CartScreen(navController: NavController, viewModel: CartViewModel, userName:
     var couponCode by remember { mutableStateOf("") } // Kupon kodu state
     var appliedCoupon by remember { mutableStateOf<FirebaseCoupon?>(null) } // Uygulanan kupon state
 
+    // SnackbarHostState oluşturuyoruz
+    val snackbarHostState = remember { SnackbarHostState() }
+    val coroutineScope = rememberCoroutineScope()
+
     LaunchedEffect(key1 = true) {
-        viewModel.getCartFoods(userName)
+        viewModel.getCartFoods(userName) // userName kullanılıyor
     }
 
     // Scaffold ile sepet ekranı düzenleniyor
     Scaffold(
+        snackbarHost = { SnackbarHost(snackbarHostState) },  // Scaffold'a snackbarHost ekledik
         modifier = Modifier.background(BackgroundColor),
         topBar = {
             CartTopAppBar(navController, "Sepetim")
@@ -102,9 +110,34 @@ fun CartScreen(navController: NavController, viewModel: CartViewModel, userName:
                     Spacer(modifier = Modifier.height(16.dp))
 
                     // Sepeti Onayla Butonu
-                    ConfirmCartButton {
-                        // Sepet Onaylama İşlemi
-                    }
+                    ConfirmCartButton(
+                        cartFoodList = sortedCartFoodList,
+                        appliedCoupon = appliedCoupon,
+                        onConfirm = {
+                            viewModel.addOrderHistory(
+                                cartFoodList = sortedCartFoodList,
+                                appliedCoupon = appliedCoupon,
+                                onSuccess = {
+                                    // Başarılı olunca Snackbar ile mesaj göster
+                                    coroutineScope.launch {
+                                        snackbarHostState.showSnackbar("Sipariş başarıyla kaydedildi.")
+                                    }
+                                    navController.navigate("HomeScreen")
+                                },
+                                onFailure = { e ->
+                                    // Hata durumunda Snackbar ile mesaj göster
+                                    coroutineScope.launch {
+                                        snackbarHostState.showSnackbar("Hata: ${e.message}")
+                                    }
+                                }
+                            )
+                        },
+                        onDismiss = {
+                            // Eğer kullanıcı onay vermezse işlemi iptal et
+                        },
+                        viewModel = viewModel,
+                        userName = userName
+                    )
                 } else {
                     EmptyCartMessage()
                 }
@@ -112,6 +145,8 @@ fun CartScreen(navController: NavController, viewModel: CartViewModel, userName:
         }
     )
 }
+
+
 
 /**
  * Kupon kodu giriş alanı. Kullanıcı kupon kodunu girip uygulayabilir.
@@ -340,19 +375,54 @@ fun TotalPriceSection(cartFoodList: List<Cart>, appliedCoupon: FirebaseCoupon?) 
  * @param onConfirm Sepeti onaylama işlemini başlatan fonksiyon
  */
 @Composable
-fun ConfirmCartButton(onConfirm: () -> Unit) {
+fun ConfirmCartButton(
+    cartFoodList: List<Cart>,
+    appliedCoupon: FirebaseCoupon?,
+    onConfirm: () -> Unit,
+    onDismiss: () -> Unit,
+    viewModel: CartViewModel,
+    userName: String
+) {
+    var showDialog by remember { mutableStateOf(false) } // Dialog görünürlülük durumu
+
     Button(
-        onClick = onConfirm,
+        onClick = { showDialog = true },  // Butona tıklanırsa dialog açılır
         modifier = Modifier.fillMaxWidth(),
         colors = ButtonDefaults.buttonColors(
             containerColor = AddToCartButtonColor,
             contentColor = Color.White
-
         )
     ) {
         Text(text = "Sepeti Onayla", style = MaterialTheme.typography.bodyLarge)
     }
+
+    // Onay diyaloğu
+    if (showDialog) {
+        AlertDialog(
+            onDismissRequest = { showDialog = false },
+            title = { Text("Siparişi Onayla") },
+            text = { Text("Sepeti onaylamak istediğinize emin misiniz?") },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        viewModel.deleteAllFoodsFromCart(userName, cartFoodList)
+                        showDialog = false
+                        onConfirm() // Sepeti onaylayınca siparişi kaydetme işlemi
+                    }
+                ) {
+                    Text("Evet")
+                }
+            },
+            dismissButton = {
+                Button(
+                    onClick = { showDialog = false }) {
+                    Text("Hayır")
+                }
+            }
+        )
+    }
 }
+
 
 /**
  * Boş sepet mesajı. Eğer kullanıcı sepeti boş ise bu mesaj görüntülenir.

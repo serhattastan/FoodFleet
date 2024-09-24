@@ -4,6 +4,7 @@ import android.util.Log
 import com.cloffygames.foodfleet.data.entity.Cart
 import com.cloffygames.foodfleet.retrofit.CartDao
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
 
 /**
@@ -70,7 +71,6 @@ class CartDataSource(private val cartDao: CartDao) {
      */
     suspend fun deleteFoodFromCart(sepet_yemek_id: Int, kullanici_adi: String) {
         cartDao.deleteFoodFromCart(sepet_yemek_id, kullanici_adi)
-        Log.e("Yemek Silme Sonucu", cartDao.deleteFoodFromCart(sepet_yemek_id, kullanici_adi).message)
     }
 
     suspend fun updateOrAddFoodToCart(
@@ -154,6 +154,21 @@ class CartDataSource(private val cartDao: CartDao) {
                     )
                 } catch (e: Exception) {
                     Log.e("Hata", "Yemek azaltma işleminde hata: ${e.message}")
+                }
+            }
+        }
+    }
+
+    suspend fun deleteAllFoodsFromCart(kullanici_adi: String, cartFoodList: List<Cart>) {
+        withContext(Dispatchers.IO) {
+            cartFoodList.forEach { cartItem ->
+                try {
+                    // Yemek sepetten silinir
+                    cartDao.deleteFoodFromCart(cartItem.sepet_yemek_id, kullanici_adi)
+                    Log.d("Sepet", "Yemek başarıyla silindi: ${cartItem.yemek_adi}")
+
+                } catch (e: Exception) {
+                    Log.e("Sepet", "Yemek silme hatası: ${e.message}")
                 }
             }
         }
