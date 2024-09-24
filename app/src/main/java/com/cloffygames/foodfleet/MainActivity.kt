@@ -10,6 +10,7 @@ import com.cloffygames.foodfleet.uix.view.Transitions
 import com.cloffygames.foodfleet.uix.viewmodel.AuthViewModel
 import com.cloffygames.foodfleet.uix.viewmodel.CartViewModel
 import com.cloffygames.foodfleet.uix.viewmodel.CategoryDetailScreenViewModel
+import com.cloffygames.foodfleet.uix.viewmodel.FavoriteViewModel
 import com.cloffygames.foodfleet.uix.viewmodel.FoodDetailViewModel
 import com.cloffygames.foodfleet.uix.viewmodel.HomeViewModel
 import com.cloffygames.foodfleet.uix.viewmodel.OrderHistoryDetailViewModel
@@ -31,13 +32,14 @@ class MainActivity : ComponentActivity() {
     val searchViewModel : SearchViewModel by viewModels()
     val orderHistoryViewModel : OrderHistoryViewModel by viewModels()
     val orderHistoryDetailViewModel : OrderHistoryDetailViewModel by viewModels()
+    val favoriteViewModel : FavoriteViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
             FoodFleetTheme {
-                Transitions(authViewModel, homeViewModel, profileDetailViewModel, profileViewModel, foodDetailViewModel, categoryDetailScreenViewModel, cartViewModel, searchViewModel, orderHistoryViewModel, orderHistoryDetailViewModel)
+                Transitions(authViewModel, homeViewModel, profileDetailViewModel, profileViewModel, foodDetailViewModel, categoryDetailScreenViewModel, cartViewModel, searchViewModel, orderHistoryViewModel, orderHistoryDetailViewModel, favoriteViewModel)
             }
         }
     }

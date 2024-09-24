@@ -79,6 +79,7 @@ class UserDataSource(
         }
     }
 
+
     fun getOrderHistory(onSuccess: (List<OrderHistory>) -> Unit, onFailure: (Exception) -> Unit) {
         val uid = firebaseAuth.currentUser?.uid
         uid?.let {
@@ -104,6 +105,18 @@ class UserDataSource(
                 .addOnFailureListener { e -> onFailure(e) }
         }
     }
+
+    fun removeFavoriteFood(yemek_id: String, onSuccess: () -> Unit, onFailure: (Exception) -> Unit) {
+        val uid = firebaseAuth.currentUser?.uid
+        uid?.let {
+            val favoritesCollection = firestore.collection("users").document(it).collection("favorites")
+            favoritesCollection.document(yemek_id).delete()
+                .addOnSuccessListener { onSuccess() }
+                .addOnFailureListener { e -> onFailure(e) }
+        }
+    }
+
+
 
 
 

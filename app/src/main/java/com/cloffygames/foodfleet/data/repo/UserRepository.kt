@@ -26,4 +26,8 @@ class UserRepository(private val userDataSource: UserDataSource) {
     fun getFavoriteFoods(onSuccess: (List<FavoriteFood>) -> Unit, onFailure: (Exception) -> Unit) =
         userDataSource.getFavoriteFoods(onSuccess, onFailure)
 
+    fun removeFavoriteFood(yemek_adi: String, onSuccess: () -> Unit, onFailure: (Exception) -> Unit) =
+        userDataSource.removeFavoriteFood(yemek_adi, onSuccess, onFailure)
+
+
 }

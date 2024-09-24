@@ -35,7 +35,8 @@ fun Transitions(
     cartViewModel: CartViewModel,
     searchViewModel: SearchViewModel,
     orderHistoryViewModel: OrderHistoryViewModel,
-    orderHistoryDetailViewModel: OrderHistoryDetailViewModel
+    orderHistoryDetailViewModel: OrderHistoryDetailViewModel,
+    favoriteViewModel: FavoriteViewModel
 ){
     // Navigasyon kontrolcüsü, uygulama içi ekranlar arasında geçişi yönetir
     val navController = rememberNavController()
@@ -120,6 +121,9 @@ fun Transitions(
         ){
             val orderId = it.arguments?.getString("orderId")
             OrderHistoryDetailScreen(navController, orderId.toString(), orderHistoryDetailViewModel)
+        }
+        composable("FavoriteScreen"){
+            FavoriteScreen(navController, favoriteViewModel)
         }
     }
 }

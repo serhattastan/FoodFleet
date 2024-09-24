@@ -76,7 +76,7 @@ fun OrderHistoryDetailScreen(
             ) {
                 orderHistory?.let { order ->
                     LazyColumn(
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier.fillMaxWidth().height(500.dp),
                     ) {
                         // Sepet içeriklerini listeliyoruz
                         items(order.sepet_listesi) { cartItem ->

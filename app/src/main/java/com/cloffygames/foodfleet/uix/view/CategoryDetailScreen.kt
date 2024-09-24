@@ -17,6 +17,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material3.Card
@@ -39,10 +40,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import com.cloffygames.foodfleet.data.entity.FavoriteFood
 import com.cloffygames.foodfleet.data.entity.FirebaseFood
 import com.cloffygames.foodfleet.data.entity.Food
 import com.cloffygames.foodfleet.ui.theme.AddToCartButtonColor
@@ -142,8 +145,24 @@ fun CategoryDetailScreen(
  * @param viewModel Kategori ekranı işlemlerini yöneten ViewModel
  */
 @Composable
-fun CategoryDetailCard(food: FirebaseFood, navController: NavController, userName: String, viewModel: CategoryDetailScreenViewModel) {
-    // Her bir yiyeceği kart olarak gösterir
+fun CategoryDetailCard(
+    food: FirebaseFood,
+    navController: NavController,
+    userName: String,
+    viewModel: CategoryDetailScreenViewModel
+) {
+    // Favoriye eklenip eklenmediğini kontrol eden bir state
+    var isFavorite by remember { mutableStateOf(false) }
+
+    // Favorilerde olup olmadığını kontrol etmek için LaunchedEffect
+    LaunchedEffect(Unit) {
+        viewModel.checkIfFavorite(food.yemek_adi,
+            onResult = { result ->
+                isFavorite = result  // Favorilerde olup olmadığını ayarlıyoruz
+            }
+        )
+    }
+
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -151,14 +170,13 @@ fun CategoryDetailCard(food: FirebaseFood, navController: NavController, userNam
             .padding(horizontal = 8.dp, vertical = 16.dp)
             .shadow(elevation = 4.dp)
             .clickable {
-                // Yiyecek detayına geçiş yaparken yiyecek bilgisini JSON formatında gönderir
                 val transitionFood = Food(food.yemek_id, food.yemek_adi, food.yemek_resim_adi, food.yemek_fiyat.toInt())
                 val json = Uri.encode(Gson().toJson(transitionFood))
                 navController.navigate("FoodDetailScreen/${json}")
             },
-        shape = RoundedCornerShape(16.dp), // Kartın köşelerini yuvarlatır
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp), // Kartın gölgesi
-        colors = CardDefaults.cardColors(containerColor = BackgroundColor) // Kartın arka plan rengi
+        shape = RoundedCornerShape(16.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+        colors = CardDefaults.cardColors(containerColor = BackgroundColor)
     ) {
         Column(
             modifier = Modifier.fillMaxSize(),
@@ -171,10 +189,10 @@ fun CategoryDetailCard(food: FirebaseFood, navController: NavController, userNam
                     .height(140.dp)
             ) {
                 GlideImage(
-                    imageModel = food.yemek_resim_adi, // Firebase'den alınan yiyecek resmi URL'si
-                    contentDescription = food.yemek_adi, // Yiyecek açıklaması
+                    imageModel = food.yemek_resim_adi,
+                    contentDescription = food.yemek_adi,
                     modifier = Modifier.fillMaxSize(),
-                    loading = { ShimmerEffect(modifier = Modifier.fillMaxSize()) } // Resim yüklenirken shimmer efekti
+                    loading = { ShimmerEffect(modifier = Modifier.fillMaxSize()) }
                 )
             }
 
@@ -201,22 +219,50 @@ fun CategoryDetailCard(food: FirebaseFood, navController: NavController, userNam
                     )
                 }
 
-                // Favorilere ekle butonu
+                // Favorilere ekle veya çıkar butonu
                 IconButton(
-                    onClick = { /* Favorilere ekle işlemi */ },
+                    onClick = {
+                        if (isFavorite) {
+                            // Favorilerden çıkar
+                            viewModel.removeFavoriteFood(food.yemek_id.toString(),
+                                onSuccess = {
+                                    isFavorite = false  // Başarılı olunca favorilerden çıkarılmış olduğunu göster
+                                },
+                                onFailure = { e ->
+                                    // Hata durumunda işleme kodu
+                                }
+                            )
+                        } else {
+                            // Favorilere ekle
+                            val favoriteFood = FavoriteFood(
+                                yemek_id = food.yemek_id,
+                                yemek_adi = food.yemek_adi,
+                                yemek_resim_adi = food.yemek_resim_adi,
+                                yemek_fiyat = food.yemek_fiyat.toInt()
+                            )
+
+                            viewModel.addFavoriteFood(favoriteFood,
+                                onSuccess = {
+                                    isFavorite = true  // Başarılı olunca favoriye eklenmiş olduğunu göster
+                                },
+                                onFailure = { e ->
+                                    // Hata durumunda işleme kodu
+                                }
+                            )
+                        }
+                    },
                     modifier = Modifier.size(24.dp)
                 ) {
                     Icon(
-                        imageVector = Icons.Default.FavoriteBorder,
-                        contentDescription = "Add to Favorite",
-                        tint = AddToCartButtonColor
+                        imageVector = if (isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder, // Favori durumuna göre ikon değiştiriliyor
+                        contentDescription = if (isFavorite) "Remove from Favorite" else "Add to Favorite",
+                        tint = if (isFavorite) Color.Red else AddToCartButtonColor
                     )
                 }
 
                 // Sepete ekle butonu
                 IconButton(
                     onClick = {
-                        // Kullanıcının seçtiği yemeği sepete ekle
                         viewModel.addFoodToCart(food.yemek_adi, food.yemek_resim_adi, food.yemek_fiyat.toInt(), 1, userName)
                     },
                     modifier = Modifier.size(24.dp)

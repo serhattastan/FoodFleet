@@ -21,6 +21,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material.icons.filled.ShoppingCart
@@ -54,6 +55,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import com.cloffygames.foodfleet.data.entity.FavoriteFood
 import com.cloffygames.foodfleet.data.entity.FirebaseFood
 import com.cloffygames.foodfleet.data.entity.Food
 import com.cloffygames.foodfleet.ui.theme.AddToCartButtonColor
@@ -106,8 +108,53 @@ fun FoodDetailScreen(food: Food, navController: NavController, viewModel: FoodDe
                     }
                 },
                 actions = {
-                    IconButton(onClick = { /* Favorilere ekle işlemi */ }) {
-                        Icon(Icons.Default.FavoriteBorder, contentDescription = "Favorite", tint = PrimaryTextColor)
+                    var isFavorite by remember { mutableStateOf(false) }
+                    LaunchedEffect(Unit) {
+                        viewModel.checkIfFavorite(food.yemek_adi,
+                            onResult = { result ->
+                                isFavorite = result  // Favorilerde olup olmadığını ayarlıyoruz
+                            }
+                        )
+                    }
+                    // Favorilere ekle veya çıkar butonu
+                    IconButton(
+                        onClick = {
+                            if (isFavorite) {
+                                // Favorilerden çıkar
+                                viewModel.removeFavoriteFood(food.yemek_id.toString(),
+                                    onSuccess = {
+                                        isFavorite = false  // Başarılı olunca favorilerden çıkarılmış olduğunu göster
+                                    },
+                                    onFailure = { e ->
+                                        // Hata durumunda işleme kodu
+                                    }
+                                )
+                            } else {
+                                // Favorilere ekle
+                                val favoriteFood = FavoriteFood(
+                                    yemek_id = food.yemek_id,
+                                    yemek_adi = food.yemek_adi,
+                                    yemek_resim_adi = food.yemek_resim_adi,
+                                    yemek_fiyat = food.yemek_fiyat.toInt()
+                                )
+
+                                viewModel.addFavoriteFood(favoriteFood,
+                                    onSuccess = {
+                                        isFavorite = true  // Başarılı olunca favoriye eklenmiş olduğunu göster
+                                    },
+                                    onFailure = { e ->
+                                        // Hata durumunda işleme kodu
+                                    }
+                                )
+                            }
+                        },
+                        modifier = Modifier.size(24.dp)
+                    ) {
+                        Icon(
+                            imageVector = if (isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder, // Favori durumuna göre ikon değiştiriliyor
+                            contentDescription = if (isFavorite) "Remove from Favorite" else "Add to Favorite",
+                            tint = if (isFavorite) Color.Red else AddToCartButtonColor
+                        )
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = BackgroundColor)
@@ -266,6 +313,8 @@ fun FoodDetailScreen(food: Food, navController: NavController, viewModel: FoodDe
  */
 @Composable
 fun RecommendedFoodCard(food: FirebaseFood, navController: NavController, viewModel: FoodDetailViewModel, userName: String) {
+    // Favoriye eklenip eklenmediğini kontrol eden bir state
+    var isFavorite by remember { mutableStateOf(false) }
     Card(
         modifier = Modifier
             .size(200.dp, 166.dp)
@@ -318,14 +367,44 @@ fun RecommendedFoodCard(food: FirebaseFood, navController: NavController, viewMo
                     )
                 }
 
+                // Favorilere ekle veya çıkar butonu
                 IconButton(
-                    onClick = {  },
+                    onClick = {
+                        if (isFavorite) {
+                            // Favorilerden çıkar
+                            viewModel.removeFavoriteFood(food.yemek_id.toString(),
+                                onSuccess = {
+                                    isFavorite = false  // Başarılı olunca favorilerden çıkarılmış olduğunu göster
+                                },
+                                onFailure = { e ->
+                                    // Hata durumunda işleme kodu
+                                }
+                            )
+                        } else {
+                            // Favorilere ekle
+                            val favoriteFood = FavoriteFood(
+                                yemek_id = food.yemek_id,
+                                yemek_adi = food.yemek_adi,
+                                yemek_resim_adi = food.yemek_resim_adi,
+                                yemek_fiyat = food.yemek_fiyat.toInt()
+                            )
+
+                            viewModel.addFavoriteFood(favoriteFood,
+                                onSuccess = {
+                                    isFavorite = true  // Başarılı olunca favoriye eklenmiş olduğunu göster
+                                },
+                                onFailure = { e ->
+                                    // Hata durumunda işleme kodu
+                                }
+                            )
+                        }
+                    },
                     modifier = Modifier.size(24.dp)
                 ) {
                     Icon(
-                        imageVector = Icons.Default.FavoriteBorder,
-                        contentDescription = "Add to Favorite",
-                        tint = AddToCartButtonColor
+                        imageVector = if (isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder, // Favori durumuna göre ikon değiştiriliyor
+                        contentDescription = if (isFavorite) "Remove from Favorite" else "Add to Favorite",
+                        tint = if (isFavorite) Color.Red else AddToCartButtonColor
                     )
                 }
 

@@ -3,6 +3,8 @@ package com.cloffygames.foodfleet.uix.viewmodel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.cloffygames.foodfleet.data.entity.FavoriteFood
 import com.cloffygames.foodfleet.data.entity.FirebaseCoupon
 import com.cloffygames.foodfleet.data.entity.FirebaseFood
 import com.cloffygames.foodfleet.data.entity.Food
@@ -107,6 +109,40 @@ class HomeViewModel @Inject constructor(
     fun deleteFoodFromCart(sepet_yemek_id: Int, kullanici_adi: String){
         CoroutineScope(Dispatchers.Main).launch {
             cartRepository.deleteFoodFromCart(sepet_yemek_id, kullanici_adi) // Sepetten yiyeceği sil
+        }
+    }
+
+    fun addFavoriteFood(
+        food: FavoriteFood,
+        onSuccess: () -> Unit,
+        onFailure: (Exception) -> Unit
+    ) {
+        viewModelScope.launch {
+            try {
+                userRepo.addFavoriteFood(food, onSuccess, onFailure)
+            } catch (e: Exception) {
+                onFailure(e)
+            }
+        }
+    }
+
+    fun checkIfFavorite(yemek_adi: String, onResult: (Boolean) -> Unit) {
+        viewModelScope.launch {
+            userRepo.getFavoriteFoods(
+                onSuccess = { favoriteFoods ->
+                    val isFavorite = favoriteFoods.any { it.yemek_adi == yemek_adi }
+                    onResult(isFavorite)
+                },
+                onFailure = { e ->
+                    onResult(false)
+                }
+            )
+        }
+    }
+
+    fun removeFavoriteFood(yemek_adi: String, onSuccess: () -> Unit, onFailure: (Exception) -> Unit) {
+        viewModelScope.launch {
+            userRepo.removeFavoriteFood(yemek_adi, onSuccess, onFailure)
         }
     }
 }
