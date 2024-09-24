@@ -180,7 +180,7 @@ fun FoodDetailScreen(food: Food, navController: NavController, viewModel: FoodDe
                     .padding(16.dp)
                     .clip(RoundedCornerShape(16.dp)) // Köşeleri yuvarlatma işlemi
                     .shadow(8.dp, shape = RoundedCornerShape(16.dp)) // Gölge eklenmesi
-                    .background(SecondaryColor, shape = RoundedCornerShape(16.dp)), // Arka plan rengi
+                    .background(PrimaryColor, shape = RoundedCornerShape(16.dp)), // Arka plan rengi
                 contentScale = ContentScale.Crop,
                 loading = { ShimmerEffect(modifier = Modifier.fillMaxSize()) },
                 failure = {

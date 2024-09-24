@@ -31,7 +31,6 @@ import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.FilterList
 import androidx.compose.material.icons.filled.History
-import androidx.compose.material.icons.filled.ManageAccounts
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material3.Button
@@ -250,7 +249,7 @@ fun CouponPager(firebaseCouponList: List<FirebaseCoupon>) {
             itemsIndexed(firebaseCouponList) { _, coupon ->
                 Card(
                     modifier = Modifier
-                        .height(180.dp)
+                        .height(150.dp)
                         .fillParentMaxWidth()
                         .padding(horizontal = 2.dp),
                     shape = RoundedCornerShape(16.dp),
@@ -266,6 +265,7 @@ fun CouponPager(firebaseCouponList: List<FirebaseCoupon>) {
                             loading = {
                                 ShimmerEffect(modifier = Modifier.fillMaxSize())
                             }
+
                         )
                     }
                 }

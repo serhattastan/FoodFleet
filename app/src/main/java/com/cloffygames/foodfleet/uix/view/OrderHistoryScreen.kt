@@ -29,10 +29,13 @@ fun OrderHistoryScreen(
     viewModel: OrderHistoryViewModel
 ) {
     var orderHistoryList by remember { mutableStateOf(emptyList<OrderHistory>()) }
+    var selectedSortOption by remember { mutableStateOf("Tarih (Yeni - Eski)") }
 
     LaunchedEffect(Unit) {
         viewModel.getOrderHistory(
-            onSuccess = { orders -> orderHistoryList = orders },
+            onSuccess = { orders ->
+                orderHistoryList = sortOrders(orders, selectedSortOption)
+            },
             onFailure = { e -> /* Handle error */ }
         )
     }
@@ -63,6 +66,12 @@ fun OrderHistoryScreen(
                 verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
+                SortOptionDropdown(selectedSortOption) { selectedOption ->
+                    selectedSortOption = selectedOption
+                    // Sipariş listesini seçilen sıralama yöntemine göre güncelle
+                    orderHistoryList = sortOrders(orderHistoryList, selectedSortOption)
+                }
+
                 if (orderHistoryList.isNotEmpty()) {
                     LazyColumn(
                         modifier = Modifier.fillMaxSize()
@@ -86,6 +95,53 @@ fun OrderHistoryScreen(
         }
     )
 }
+
+// Dropdown ile sıralama seçeneği sunuyoruz
+@Composable
+fun SortOptionDropdown(selectedOption: String, onOptionSelected: (String) -> Unit) {
+    var expanded by remember { mutableStateOf(false) }
+    val options = listOf("Tarih (Yeni - Eski)", "Tarih (Eski - Yeni)", "Sepet Tutarı (Yüksek - Düşük)", "Sepet Tutarı (Düşük - Yüksek)")
+
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 8.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        Button(
+            onClick = { expanded = true },
+            colors = ButtonDefaults.buttonColors(containerColor = PrimaryColor)
+        ) {
+            Text(text = selectedOption, color = Color.White)
+        }
+        DropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { expanded = false }
+        ) {
+            options.forEach { option ->
+                DropdownMenuItem(
+                    text = { Text(option) },
+                    onClick = {
+                        onOptionSelected(option)
+                        expanded = false
+                    }
+                )
+            }
+        }
+    }
+}
+
+// Siparişleri sıralamak için bir fonksiyon
+fun sortOrders(orders: List<OrderHistory>, selectedSortOption: String): List<OrderHistory> {
+    return when (selectedSortOption) {
+        "Tarih (Yeni - Eski)" -> orders.sortedByDescending { it.siparis_tarihi }
+        "Tarih (Eski - Yeni)" -> orders.sortedBy { it.siparis_tarihi }
+        "Sepet Tutarı (Yüksek - Düşük)" -> orders.sortedByDescending { it.toplam_fiyat }
+        "Sepet Tutarı (Düşük - Yüksek)" -> orders.sortedBy { it.toplam_fiyat }
+        else -> orders
+    }
+}
+
 
 @Composable
 fun OrderHistoryCard(order: OrderHistory, onClick: () -> Unit) {
